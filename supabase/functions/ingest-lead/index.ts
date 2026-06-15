@@ -68,6 +68,7 @@ Deno.serve(async (req) => {
       knockout_passed: knockoutPassed,
       nivel_ingles: nivelIngles,
       expectativa_salarial: expectativaSalarial,
+      ubicacion: str(form.get("ubicacion")) || null,
       cualificacion_extra: {
         ...(cefr ? { nivel_ingles_cefr: cefr } : {}),
         ...(expectativaSalarial != null

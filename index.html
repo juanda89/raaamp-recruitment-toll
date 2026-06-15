@@ -103,6 +103,13 @@
     align-items:center;justify-content:center;gap:8px;text-align:center;cursor:pointer;color:var(--muted);font-size:14px;padding:18px}
   .file:hover{border-color:var(--cyan);color:var(--txt);background:var(--panel2)}
   .file .upic{font-size:30px;line-height:1}
+  /* autocompletar ciudad */
+  .ac{position:absolute;left:0;right:0;top:100%;z-index:6;background:var(--bg2);border:1px solid var(--line);
+    border-radius:10px;margin-top:4px;box-shadow:0 14px 34px rgba(11,11,11,.14);overflow-y:auto;max-height:240px;display:none}
+  .ac.show{display:block}
+  .ac div{padding:10px 12px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--line2)}
+  .ac div:last-child{border-bottom:0}
+  .ac div:hover{background:var(--panel2)}
   .q{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px}
   .q .qt{font-size:13.5px;margin-bottom:9px}
   .seg{display:flex;gap:7px}
@@ -205,6 +212,10 @@
         <div class="field"><label class="req" data-i18n="f_lang"></label>
           <div class="seg" id="langpref"><button type="button" data-v="es">Español</button><button type="button" data-v="en">English</button></div>
         </div>
+        <div class="field" style="position:relative"><label class="req" data-i18n="f_city"></label>
+          <input id="city" type="text" autocomplete="off" spellcheck="false">
+          <div class="ac" id="cityac"></div>
+        </div>
         <div class="field" id="kobox"></div>
         <div class="field"><label class="req" data-i18n="f_english"></label><select id="english"></select></div>
         <div class="field"><label class="req" data-i18n="f_salary"></label><input id="salary" type="number" min="0" inputmode="numeric"></div>
@@ -283,6 +294,7 @@ const I18N = {
     f_title:"Aplica a la vacante", f_sub:"Toma menos de 2 minutos. Te contactaremos por WhatsApp.",
     f_name:"Nombre completo", f_wa:"WhatsApp (con indicativo)", f_email:"Correo electrónico",
     f_lang:"¿En qué idioma prefieres que te contactemos?",
+    f_city:"Ciudad", f_city_ph:"Escribe y elige tu ciudad…", err_city:"Selecciona tu ciudad.",
     f_cv:"Hoja de vida (PDF)", f_cv_ph:"Haz clic para adjuntar tu CV",
     f_consent:"Autorizo a raaamp a contactarme por WhatsApp y el tratamiento de mis datos (Ley 1581 de 2012).",
     f_send:"Enviar aplicación",
@@ -337,6 +349,7 @@ const I18N = {
     f_title:"Apply for this role", f_sub:"Takes under 2 minutes. We'll reach out on WhatsApp.",
     f_name:"Full name", f_wa:"WhatsApp (with country code)", f_email:"Email",
     f_lang:"Which language should we contact you in?",
+    f_city:"City", f_city_ph:"Type and pick your city…", err_city:"Please select your city.",
     f_cv:"Resume (PDF)", f_cv_ph:"Click to attach your CV",
     f_consent:"I authorize raaamp to contact me on WhatsApp and to process my data.",
     f_send:"Submit application",
@@ -378,6 +391,7 @@ function render(){
   eng.innerHTML = `<option value="" disabled ${cur?"":"selected"}>${t().english_ph}</option>` +
     t().english_opts.map(o=>`<option value="${o[0]}" ${cur===o[0]?"selected":""}>${o[1]}</option>`).join("");
   document.getElementById("salary").placeholder = t().f_salary_ph;
+  document.getElementById("city").placeholder = t().f_city_ph;
   document.getElementById("cvLabel").textContent = cv.files[0] ? "📎 "+cv.files[0].name : t().f_cv_ph;
   document.querySelectorAll("#lang button").forEach(b=>b.classList.toggle("on", b.dataset.l===lang));
   document.querySelectorAll("#langpref button").forEach(b=>b.classList.toggle("on", b.dataset.v===commLang));
@@ -401,6 +415,43 @@ document.getElementById("langpref").addEventListener("click",e=>{
   commLang=b.dataset.v;
   document.querySelectorAll("#langpref button").forEach(x=>x.classList.toggle("on",x===b));
 });
+
+// Autocompletar ciudad con Photon (OpenStreetMap, sin API key)
+function esc(s){ const d=document.createElement("div"); d.textContent=s==null?"":s; return d.innerHTML; }
+let cityValue = "";
+const cityInput = document.getElementById("city");
+const cityAc = document.getElementById("cityac");
+let cityTimer;
+const PLACE_TYPES = ["city","town","village","municipality","hamlet"];
+cityInput.addEventListener("input", ()=>{
+  cityValue = "";                       // se invalida hasta que elija una opción
+  const q = cityInput.value.trim();
+  clearTimeout(cityTimer);
+  if(q.length < 2){ cityAc.classList.remove("show"); return; }
+  cityTimer = setTimeout(async ()=>{
+    try{
+      const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=8&lang=en`);
+      const d = await r.json();
+      const seen = new Set(), opts = [];
+      for(const f of (d.features||[])){
+        const p = f.properties||{};
+        if(!(PLACE_TYPES.includes(p.osm_value) || p.type==="city")) continue;
+        if(!p.name) continue;
+        const label = [p.name, p.state, p.country].filter(Boolean).join(", ");
+        if(seen.has(label)) continue; seen.add(label);
+        opts.push(label);
+        if(opts.length>=6) break;
+      }
+      cityAc.innerHTML = opts.map(o=>`<div data-c="${o.replace(/"/g,"&quot;")}">${esc(o)}</div>`).join("");
+      cityAc.classList.toggle("show", opts.length>0);
+    }catch{ cityAc.classList.remove("show"); }
+  }, 250);
+});
+cityAc.addEventListener("click", e=>{
+  const d = e.target.closest("div[data-c]"); if(!d) return;
+  cityValue = d.dataset.c; cityInput.value = cityValue; cityAc.classList.remove("show");
+});
+document.addEventListener("click", e=>{ if(!e.target.closest("#city, #cityac")) cityAc.classList.remove("show"); });
 
 const overlay=document.getElementById("overlay");
 document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>overlay.classList.add("open"));
@@ -429,6 +480,8 @@ form.addEventListener("submit", async e=>{
   if(!engVal) return showErr(t().err_english);
   const salaryVal=Number(document.getElementById("salary").value);
   if(!salaryVal||salaryVal<=0) return showErr(t().err_salary);
+  const ubicacion = cityValue || cityInput.value.trim();
+  if(!ubicacion) return showErr(t().err_city);
   if(!document.getElementById("optin").checked) return showErr(t().err_consent);
   if(!cv.files[0]) return showErr(t().err_cv);
   btn.disabled=true; btn.textContent=t().sending;
@@ -445,6 +498,7 @@ form.addEventListener("submit", async e=>{
     fd.append("knockout",JSON.stringify(ko));
     fd.append("nivel_ingles",nivel_ingles); fd.append("nivel_ingles_cefr",engVal);
     fd.append("expectativa_salarial",String(salaryVal)); fd.append("salario_periodo","anual"); fd.append("salario_moneda","USD");
+    fd.append("ubicacion",ubicacion);
     fd.append("cv",cv.files[0]);
     const res=await fetch(`${C.FUNCTIONS_URL}/ingest-lead`,{
       method:"POST", headers:{apikey:C.ANON_KEY,Authorization:`Bearer ${C.ANON_KEY}`}, body:fd });
