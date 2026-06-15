@@ -77,9 +77,12 @@
   .x{float:right;background:transparent;border:0;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
   label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px;font-weight:600}
   .req:after{content:" *";color:var(--cyan)}
-  input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+  input,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
     border-radius:11px;padding:12px 13px;font-size:14.5px;font-family:inherit}
-  input:focus{outline:none;border-color:var(--cyan)}
+  input:focus,select:focus{outline:none;border-color:var(--cyan)}
+  select{appearance:none;-webkit-appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235B6675' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
   .field{margin-bottom:16px}
   .file{border:1.5px dashed var(--line);border-radius:11px;padding:16px;text-align:center;cursor:pointer;color:var(--muted);font-size:14px}
   .file:hover{border-color:var(--cyan);color:var(--txt)}
@@ -179,6 +182,7 @@
         <div class="field"><label class="req" data-i18n="f_wa"></label><input name="whatsapp" required inputmode="tel" placeholder="+57..."></div>
         <div class="field"><label data-i18n="f_email"></label><input name="email" type="email"></div>
         <div class="field" id="kobox"></div>
+        <div class="field"><label class="req" data-i18n="f_english"></label><select id="english"></select></div>
         <div class="field">
           <label class="req" data-i18n="f_cv"></label>
           <label class="file" for="cv" id="cvLabel"></label>
@@ -246,10 +250,12 @@ const I18N = {
     f_consent:"Autorizo a raaamp a contactarme por WhatsApp y el tratamiento de mis datos (Ley 1581 de 2012).",
     f_send:"Enviar aplicación",
     ko:["¿Tienes experiencia con automatización (n8n, Make, Zapier) o Python?",
-        "¿Puedes trabajar tiempo completo?","¿Tu nivel de inglés es al menos intermedio?"],
+        "¿Puedes trabajar tiempo completo y en dedicación exclusiva?"],
     yes:"Sí", no:"No",
+    f_english:"Nivel de inglés (MCER)", english_ph:"Selecciona tu nivel",
+    english_opts:[["A1","A1 — Principiante"],["A2","A2 — Básico"],["B1","B1 — Intermedio"],["B2","B2 — Intermedio alto"],["C1","C1 — Avanzado"],["C2","C2 — Bilingüe / Nativo"]],
     f_done_h:"¡Aplicación recibida!", f_done_p:"Gracias por aplicar. Te escribiremos por WhatsApp con los siguientes pasos.",
-    err_ko:"Responde las 3 preguntas.", err_consent:"Necesitamos tu consentimiento.", err_cv:"Adjunta tu hoja de vida.",
+    err_ko:"Responde las preguntas obligatorias.", err_english:"Selecciona tu nivel de inglés.", err_consent:"Necesitamos tu consentimiento.", err_cv:"Adjunta tu hoja de vida.",
     err_req:"Completa los campos obligatorios.", sending:"Enviando..."
   },
   en:{
@@ -296,10 +302,12 @@ const I18N = {
     f_consent:"I authorize raaamp to contact me on WhatsApp and to process my data.",
     f_send:"Submit application",
     ko:["Do you have experience with automation (n8n, Make, Zapier) or Python?",
-        "Can you work full-time?","Is your English at least intermediate?"],
+        "Can you work full-time and exclusively?"],
     yes:"Yes", no:"No",
+    f_english:"English level (CEFR)", english_ph:"Select your level",
+    english_opts:[["A1","A1 — Beginner"],["A2","A2 — Elementary"],["B1","B1 — Intermediate"],["B2","B2 — Upper-intermediate"],["C1","C1 — Advanced"],["C2","C2 — Proficient / Native"]],
     f_done_h:"Application received!", f_done_p:"Thanks for applying. We'll message you on WhatsApp with next steps.",
-    err_ko:"Please answer the 3 questions.", err_consent:"We need your consent.", err_cv:"Please attach your resume.",
+    err_ko:"Please answer the required questions.", err_english:"Please select your English level.", err_consent:"We need your consent.", err_cv:"Please attach your resume.",
     err_req:"Please complete the required fields.", sending:"Sending..."
   }
 };
@@ -325,6 +333,9 @@ function render(){
     const seg=document.querySelector(`.seg[data-key="${k}"]`);
     if(seg){ const b=seg.querySelector(`button[data-v="${v}"]`); if(b) b.classList.add("on"); }
   });
+  const eng=document.getElementById("english"); const cur=eng.value;
+  eng.innerHTML = `<option value="" disabled ${cur?"":"selected"}>${t().english_ph}</option>` +
+    t().english_opts.map(o=>`<option value="${o[0]}" ${cur===o[0]?"selected":""}>${o[1]}</option>`).join("");
   document.getElementById("cvLabel").textContent = cv.files[0] ? "📎 "+cv.files[0].name : t().f_cv_ph;
   document.querySelectorAll("#lang button").forEach(b=>b.classList.toggle("on", b.dataset.l===lang));
 }
@@ -356,19 +367,24 @@ const form=document.getElementById("form"), msg=document.getElementById("msg"), 
 form.addEventListener("submit", async e=>{
   e.preventDefault(); msg.className="msg";
   if(!form.nombre.value.trim()||!form.whatsapp.value.trim()) return showErr(t().err_req);
-  if(Object.keys(answers).length<3) return showErr(t().err_ko);
+  if(Object.keys(answers).length<2) return showErr(t().err_ko);
+  const engVal=document.getElementById("english").value;
+  if(!engVal) return showErr(t().err_english);
   if(!document.getElementById("optin").checked) return showErr(t().err_consent);
   if(!cv.files[0]) return showErr(t().err_cv);
   btn.disabled=true; btn.textContent=t().sending;
   try{
-    const ko={experiencia:answers.k0,tiempo_completo:answers.k1,ingles:answers.k2};
+    const ko={experiencia:answers.k0,exclusividad:answers.k1};
+    const nivel_ingles=({A1:"basico",A2:"basico",B1:"intermedio",B2:"intermedio",C1:"avanzado",C2:"avanzado"})[engVal];
     const fd=new FormData();
     fd.append("nombre",form.nombre.value.trim());
     fd.append("email",form.email.value.trim());
     fd.append("whatsapp",form.whatsapp.value.trim());
     fd.append("whatsapp_optin","true");
     fd.append("fuente",fuente); fd.append("utm",JSON.stringify(utm));
-    fd.append("knockout",JSON.stringify(ko)); fd.append("cv",cv.files[0]);
+    fd.append("knockout",JSON.stringify(ko));
+    fd.append("nivel_ingles",nivel_ingles); fd.append("nivel_ingles_cefr",engVal);
+    fd.append("cv",cv.files[0]);
     const res=await fetch(`${C.FUNCTIONS_URL}/ingest-lead`,{
       method:"POST", headers:{apikey:C.ANON_KEY,Authorization:`Bearer ${C.ANON_KEY}`}, body:fd });
     const data=await res.json();

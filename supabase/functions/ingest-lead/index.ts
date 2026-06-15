@@ -45,6 +45,12 @@ Deno.serve(async (req) => {
       else cvUrl = path;
     }
 
+    // Nivel de inglés capturado en el formulario (dropdown MCER -> enum).
+    const nivelInglesRaw = str(form.get("nivel_ingles"));
+    const nivelIngles = ["basico", "intermedio", "avanzado"].includes(nivelInglesRaw)
+      ? nivelInglesRaw : null;
+    const cefr = str(form.get("nivel_ingles_cefr"));
+
     // --- Crear candidato en APLICADO ---
     const { data: candidate, error } = await sb.from("rec_candidates").insert({
       nombre,
@@ -56,6 +62,8 @@ Deno.serve(async (req) => {
       cv_url: cvUrl,
       knockout_respuestas: knockout,
       knockout_passed: knockoutPassed,
+      nivel_ingles: nivelIngles,
+      cualificacion_extra: cefr ? { nivel_ingles_cefr: cefr } : {},
       estado: "APLICADO",
     }).select("*").single();
     if (error) throw error;
