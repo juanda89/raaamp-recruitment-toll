@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
     const cefr = str(form.get("nivel_ingles_cefr"));
     const salarioRaw = Number(str(form.get("expectativa_salarial")));
     const expectativaSalarial = isFinite(salarioRaw) && salarioRaw > 0 ? salarioRaw : null;
+    const idioma = str(form.get("idioma")) === "en" ? "en" : "es"; // idioma de comunicación
 
     // --- Crear candidato en APLICADO ---
     const { data: candidate, error } = await sb.from("rec_candidates").insert({
@@ -59,6 +60,7 @@ Deno.serve(async (req) => {
       email: str(form.get("email")) || null,
       whatsapp,
       whatsapp_optin: optin,
+      idioma,
       fuente: str(form.get("fuente")) || null,
       utm: parseJson(form.get("utm")),
       cv_url: cvUrl,

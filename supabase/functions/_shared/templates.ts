@@ -38,11 +38,16 @@ export function applyVars(text: string, vars: Record<string, string>): string {
   return text.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`);
 }
 
-/** Carga una plantilla y la renderiza con las variables dadas. */
+/**
+ * Carga una plantilla y la renderiza con las variables dadas, en el idioma del
+ * candidato (`lang`). Si el idioma es 'en' y hay versión en inglés, la usa; si
+ * no, cae a español.
+ */
 export async function render(
   sb: SupabaseClient,
   codigo: string,
   vars: Record<string, string>,
+  lang: "es" | "en" = "es",
 ): Promise<RenderedMessage> {
   const { data, error } = await sb
     .from("rec_message_templates")
@@ -51,12 +56,14 @@ export async function render(
     .eq("activo", true)
     .single();
   if (error || !data) throw new Error(`Plantilla ${codigo} no encontrada: ${error?.message}`);
+  const cuerpo = lang === "en" && data.cuerpo_en ? data.cuerpo_en : data.cuerpo;
+  const asunto = lang === "en" && data.asunto_en ? data.asunto_en : data.asunto;
   return {
     codigo,
     canal: data.canal,
     destinatario: data.destinatario,
-    asunto: data.asunto ? applyVars(data.asunto, vars) : null,
-    cuerpo: applyVars(data.cuerpo, vars),
+    asunto: asunto ? applyVars(asunto, vars) : null,
+    cuerpo: applyVars(cuerpo, vars),
   };
 }
 

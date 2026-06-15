@@ -27,6 +27,7 @@ export interface AgentCtx {
   nombre: string;
   empresa: string;
   cargo: string;
+  idioma: "es" | "en";          // idioma preferido del candidato
   estado: string;               // etapa actual del candidato
   known: Record<string, string>;// datos ya capturados (no re-preguntar)
   faltan: string[];             // datos a conseguir en cualificación
@@ -57,8 +58,10 @@ export function buildSystem(ctx: AgentCtx): string {
         : "Ya tienes todo; llama a completar_cualificacion.")
     : "Acompañar al candidato en su etapa actual y resolver lo que necesite (dudas, correo, reenvíos, reprogramar).";
 
+  const idiomaTxt = ctx.idioma === "en" ? "INGLÉS (English)" : "ESPAÑOL";
   return `Eres el asistente de selección de ${ctx.empresa} para el cargo "${ctx.cargo}". Hablas por WhatsApp con ${ctx.nombre}.
-TONO: humano, cálido, cercano y MUY breve (1–2 frases por mensaje). Natural, como una persona real. Español. Un emoji ocasional está bien.
+IDIOMA: el candidato eligió ${idiomaTxt}. Responde SIEMPRE en ese idioma, de forma nativa y natural.
+TONO: humano, cálido, cercano y MUY breve (1–2 frases por mensaje). Natural, como una persona real. Un emoji ocasional está bien.
 NUNCA suenes a bot: nada de listas numeradas, ni "(sí/no)", ni formularios. No saludes en cada mensaje si ya están conversando.
 
 YA SABES esto del candidato (NO lo vuelvas a preguntar):
@@ -84,6 +87,11 @@ export async function runConversation(
   ctx: AgentCtx, history: ChatMsg[], handlers: AgentHandlers,
 ): Promise<string> {
   if (!API_KEY) {
+    if (ctx.idioma === "en") {
+      return ctx.faltan.length
+        ? `Tell me, ${first(ctx.nombre)}: which city do you work from, and when could you start?`
+        : "All set! I'll email you the test. 📧";
+    }
     return ctx.faltan.length
       ? `Cuéntame, ${first(ctx.nombre)}: ¿desde qué ciudad trabajas y para cuándo podrías empezar?`
       : "¡Listo! Te envío la prueba al correo. 📧";

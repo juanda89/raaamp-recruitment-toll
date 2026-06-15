@@ -127,7 +127,9 @@ async function runAgent(sb: any, c0: Candidate) {
   };
 
   const reply = await runConversation(
-    { nombre: c0.nombre, empresa: settings.empresa, cargo: settings.cargo, estado: c0.estado, known, faltan, tieneAgenda: Boolean(settings.enlace_agenda) },
+    { nombre: c0.nombre, empresa: settings.empresa, cargo: settings.cargo,
+      idioma: c0.idioma === "en" ? "en" : "es",
+      estado: c0.estado, known, faltan, tieneAgenda: Boolean(settings.enlace_agenda) },
     history, handlers,
   );
 

@@ -202,6 +202,9 @@
           <input id="wanum" type="tel" inputmode="tel" placeholder="300 123 4567">
         </div>
         <div class="field"><label class="req" data-i18n="f_email"></label><input name="email" type="email" required></div>
+        <div class="field"><label class="req" data-i18n="f_lang"></label>
+          <div class="seg" id="langpref"><button type="button" data-v="es">Español</button><button type="button" data-v="en">English</button></div>
+        </div>
         <div class="field" id="kobox"></div>
         <div class="field"><label class="req" data-i18n="f_english"></label><select id="english"></select></div>
         <div class="field"><label class="req" data-i18n="f_salary"></label><input id="salary" type="number" min="0" inputmode="numeric"></div>
@@ -279,6 +282,7 @@ const I18N = {
     footer:"© raaamp · AI & Automation for Companies",
     f_title:"Aplica a la vacante", f_sub:"Toma menos de 2 minutos. Te contactaremos por WhatsApp.",
     f_name:"Nombre completo", f_wa:"WhatsApp (con indicativo)", f_email:"Correo electrónico",
+    f_lang:"¿En qué idioma prefieres que te contactemos?",
     f_cv:"Hoja de vida (PDF)", f_cv_ph:"Haz clic para adjuntar tu CV",
     f_consent:"Autorizo a raaamp a contactarme por WhatsApp y el tratamiento de mis datos (Ley 1581 de 2012).",
     f_send:"Enviar aplicación",
@@ -332,6 +336,7 @@ const I18N = {
     footer:"© raaamp · AI & Automation for Companies",
     f_title:"Apply for this role", f_sub:"Takes under 2 minutes. We'll reach out on WhatsApp.",
     f_name:"Full name", f_wa:"WhatsApp (with country code)", f_email:"Email",
+    f_lang:"Which language should we contact you in?",
     f_cv:"Resume (PDF)", f_cv_ph:"Click to attach your CV",
     f_consent:"I authorize raaamp to contact me on WhatsApp and to process my data.",
     f_send:"Submit application",
@@ -348,6 +353,7 @@ const I18N = {
 };
 
 let lang = (navigator.language||"es").startsWith("en") ? "en" : "es";
+let commLang = lang; // idioma de comunicación elegido por el candidato
 const answers = {};
 
 function t(){ return I18N[lang]; }
@@ -374,6 +380,7 @@ function render(){
   document.getElementById("salary").placeholder = t().f_salary_ph;
   document.getElementById("cvLabel").textContent = cv.files[0] ? "📎 "+cv.files[0].name : t().f_cv_ph;
   document.querySelectorAll("#lang button").forEach(b=>b.classList.toggle("on", b.dataset.l===lang));
+  document.querySelectorAll("#langpref button").forEach(b=>b.classList.toggle("on", b.dataset.v===commLang));
 }
 function fillList(id, arr){ document.getElementById(id).innerHTML = arr.map(x=>`<li><span>${x}</span></li>`).join(""); }
 
@@ -388,6 +395,11 @@ document.getElementById("kobox").addEventListener("click",e=>{
   const seg=b.parentElement, key=seg.dataset.key;
   seg.querySelectorAll("button").forEach(x=>x.classList.remove("on"));
   b.classList.add("on"); answers[key]=b.dataset.v;
+});
+document.getElementById("langpref").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-v]"); if(!b) return;
+  commLang=b.dataset.v;
+  document.querySelectorAll("#langpref button").forEach(x=>x.classList.toggle("on",x===b));
 });
 
 const overlay=document.getElementById("overlay");
@@ -429,6 +441,7 @@ form.addEventListener("submit", async e=>{
     fd.append("whatsapp",whatsapp);
     fd.append("whatsapp_optin","true");
     fd.append("fuente",fuente); fd.append("utm",JSON.stringify(utm));
+    fd.append("idioma",commLang);
     fd.append("knockout",JSON.stringify(ko));
     fd.append("nivel_ingles",nivel_ingles); fd.append("nivel_ingles_cefr",engVal);
     fd.append("expectativa_salarial",String(salaryVal)); fd.append("salario_periodo","anual"); fd.append("salario_moneda","USD");

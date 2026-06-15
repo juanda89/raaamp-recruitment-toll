@@ -17,6 +17,7 @@ export type Candidate = {
   email: string | null;
   whatsapp: string;
   whatsapp_optin: boolean;
+  idioma: "es" | "en";
   fuente: string | null;
   cv_url: string | null;
   knockout_respuestas: Record<string, unknown>;

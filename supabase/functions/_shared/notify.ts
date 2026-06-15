@@ -19,7 +19,8 @@ export async function notify(
   extra: Record<string, string | null | undefined> = {},
 ): Promise<void> {
   const vars = buildVars(candidate, settings, extra);
-  const msg = await render(sb, codigo, vars);
+  const lang = (candidate.idioma === "en" ? "en" : "es") as "es" | "en";
+  const msg = await render(sb, codigo, vars, lang);
 
   const wantsWa = msg.canal === "whatsapp" || msg.canal === "whatsapp_email";
   const wantsEmail = msg.canal === "email" || msg.canal === "whatsapp_email";
