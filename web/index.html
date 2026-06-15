@@ -126,6 +126,11 @@
   </section>
 
   <section class="block">
+    <h2 data-i18n="summary_h"></h2>
+    <p data-i18n="summary_p"></p>
+  </section>
+
+  <section class="block">
     <h2 data-i18n="role_h"></h2>
     <ul class="feat" id="role_list"></ul>
   </section>
@@ -136,6 +141,11 @@
   </section>
 
   <section class="block">
+    <h2 data-i18n="pref_h"></h2>
+    <ul class="feat" id="pref_list"></ul>
+  </section>
+
+  <section class="block">
     <h2 data-i18n="offer_h"></h2>
     <ul class="feat" id="offer_list"></ul>
   </section>
@@ -143,6 +153,12 @@
   <section class="block">
     <h2 data-i18n="proc_h"></h2>
     <div class="steps" id="steps"></div>
+  </section>
+
+  <section class="block">
+    <h2 data-i18n="details_h"></h2>
+    <div class="chips" id="details"></div>
+    <p style="margin-top:14px;font-size:13.5px" data-i18n="eo"></p>
   </section>
 
   <div class="endcta">
@@ -189,28 +205,43 @@ const C = window.REC_CONFIG;
 const I18N = {
   es:{
     eyebrow:"Vacante abierta · 100% remoto", title1:"AI and Automation", title2:"Specialist",
-    sub:"Construye agentes, automatizaciones e integraciones con IA que escalan operaciones reales. Únete a raaamp.",
+    sub:"Entrega soluciones de IA y automatización de alto impacto — desde el descubrimiento de requisitos hasta el prototipo y el despliegue en producción.",
     apply:"Aplicar",
-    chips:["📍 Remoto","🕐 Tiempo completo","🌐 Inglés intermedio+","🤖 n8n · Make · Python"],
+    chips:["📍 Remoto","🕐 Tiempo completo","🌐 Inglés intermedio+","🤖 n8n · Make · Python","🧠 LLMs · Agentes · RAG"],
     about_h:"Sobre raaamp",
     about_p:"raaamp es una empresa de IA y automatización para compañías. Diseñamos y operamos agentes, automatizaciones e integraciones que escalan los procesos de marketing, soporte y operaciones de nuestros clientes — con tecnología de punta y un equipo pequeño de alto impacto.",
-    role_h:"Qué harás",
-    role:["Diseñar y construir automatizaciones e integraciones de punta a punta (n8n, Make, Python).",
-      "Conectar APIs y modelos de lenguaje (LLMs) para crear agentes y flujos inteligentes.",
-      "Automatizar procesos internos y de clientes, midiendo el impacto.",
-      "Mantener, monitorear y mejorar flujos en producción."],
+    summary_h:"Sobre el rol",
+    summary_p:"Buscamos un/a ingeniero/a individual contributor (nivel medio a senior) que construya e integre LLMs en flujos de negocio reales, vía APIs, plataformas de automatización y servicios de backend. Serás dueño/a del trabajo de punta a punta —del requerimiento al prototipo y a producción— colaborando de cerca con el equipo y los clientes.",
+    role_h:"Responsabilidades",
+    role:["Diseñar, desarrollar y desplegar soluciones de IA y automatización a la medida de los objetivos del cliente.",
+      "Traducir problemas de negocio en flujos y servicios de IA listos para producción, usando Python, plataformas de automatización (n8n / Make / Zapier) y APIs de LLMs.",
+      "Construir flujos agénticos (agents) e integraciones con modelos de lenguaje.",
+      "Implementar pipelines RAG con bases de datos vectoriales y búsqueda.",
+      "Lanzar prototipos rápidos y endurecerlos en sistemas escalables.",
+      "Mantener, monitorear e iterar las soluciones en producción.",
+      "Documentar soluciones y crear playbooks internos."],
     req_h:"Requisitos",
-    req:["Experiencia con herramientas de automatización (n8n, Make o Zapier) y scripting en Python.",
-      "Integración de APIs y LLMs; nociones de agentes y prompting.",
-      "Bases de datos, webhooks y despliegue (Vercel, Supabase o similares).",
+    req:["2+ años de experiencia en ingeniería de software o IA (idealmente en automatización o GenAI).",
+      "Python sólido y experiencia construyendo APIs / servicios.",
+      "Integración práctica de LLMs: diseño de prompts, salidas estructuradas y evaluación básica.",
+      "Experiencia con al menos una plataforma de automatización (n8n, Make o Zapier).",
+      "Fundamentos de RAG y sistemas de recuperación.",
       "Inglés al menos intermedio (lectura y escritura).",
       "Autonomía, orientación a resultados y buena comunicación."],
+    pref_h:"Deseable (plus)",
+    pref:["Frameworks de agentes (LangChain, LangGraph o similares).",
+      "Observabilidad / tracing (LangSmith, OpenTelemetry).",
+      "Docker, despliegue en la nube y patrones async / colas.",
+      "Bases de datos vectoriales o de grafos / knowledge graphs.",
+      "Experiencia en startups o consultoría, en entornos de cara al cliente."],
     offer_h:"Qué ofrecemos",
     offer:["100% remoto, tiempo completo.","Proyectos retadores con IA de última generación.",
       "Equipo pequeño, ágil y de alto impacto.","Crecimiento real y aprendizaje continuo."],
     proc_h:"El proceso",
     steps:[["1","Aplicas","2 min: 3 preguntas + tu CV."],["2","WhatsApp","Conversamos y validamos encaje."],
       ["3","Prueba técnica","Un reto práctico con plazo."],["4","Entrevista","Charla final con el equipo."]],
+    details_h:"Detalles", details:["💼 Tipo: contratado","🧭 Nivel: con experiencia","📍 100% remoto","🕐 Tiempo completo"],
+    eo:"raaamp es un empleador que promueve la igualdad de oportunidades; valoramos la diversidad y la inclusión.",
     footer:"© raaamp · AI & Automation for Companies",
     f_title:"Aplica a la vacante", f_sub:"Toma menos de 2 minutos. Te contactaremos por WhatsApp.",
     f_name:"Nombre completo", f_wa:"WhatsApp (con indicativo)", f_email:"Correo (opcional)",
@@ -226,28 +257,43 @@ const I18N = {
   },
   en:{
     eyebrow:"Open role · 100% remote", title1:"AI and Automation", title2:"Specialist",
-    sub:"Build AI agents, automations and integrations that scale real operations. Join raaamp.",
+    sub:"Deliver high-impact AI and automation solutions — owning work from requirements discovery through prototype and production deployment.",
     apply:"Apply",
-    chips:["📍 Remote","🕐 Full-time","🌐 Intermediate English+","🤖 n8n · Make · Python"],
+    chips:["📍 Remote","🕐 Full-time","🌐 Intermediate English+","🤖 n8n · Make · Python","🧠 LLMs · Agents · RAG"],
     about_h:"About raaamp",
     about_p:"raaamp is an AI & automation company for businesses. We design and run agents, automations and integrations that scale our clients' marketing, support and operations — with cutting-edge tech and a small, high-impact team.",
-    role_h:"What you'll do",
-    role:["Design and build end-to-end automations and integrations (n8n, Make, Python).",
-      "Connect APIs and language models (LLMs) to create smart agents and workflows.",
-      "Automate internal and client processes, measuring the impact.",
-      "Maintain, monitor and improve production workflows."],
-    req_h:"Requirements",
-    req:["Experience with automation tools (n8n, Make or Zapier) and Python scripting.",
-      "API and LLM integration; familiarity with agents and prompting.",
-      "Databases, webhooks and deployment (Vercel, Supabase or similar).",
+    summary_h:"About the role",
+    summary_p:"We're looking for a mid-to-senior individual contributor who builds and integrates LLMs into real business workflows via APIs, automation platforms and backend services. You'll own work end to end —from requirements to prototype to production— working closely with the team and clients.",
+    role_h:"Key responsibilities",
+    role:["Design, develop and deploy tailored AI and automation solutions aligned to client objectives.",
+      "Translate business problems into production-grade AI workflows and services using Python, automation tools (n8n / Make / Zapier) and LLM platforms/APIs.",
+      "Build agentic workflows and integrations with language models.",
+      "Implement RAG pipelines using vector databases and search.",
+      "Ship fast prototypes and harden them into scalable systems.",
+      "Maintain, monitor and iterate on production solutions.",
+      "Produce technical documentation and internal playbooks."],
+    req_h:"Required qualifications",
+    req:["2+ years of software or AI engineering experience (ideally in automation or GenAI).",
+      "Strong Python and experience building APIs / services.",
+      "Hands-on LLM integration: prompt design, structured outputs and basic evaluation.",
+      "Experience with at least one workflow automation platform (n8n, Make or Zapier).",
+      "RAG fundamentals and retrieval systems knowledge.",
       "At least intermediate English (reading and writing).",
       "Autonomy, results-orientation and clear communication."],
+    pref_h:"Nice to have",
+    pref:["Agent frameworks (LangChain, LangGraph or similar).",
+      "Observability / tracing (LangSmith, OpenTelemetry).",
+      "Docker, cloud deployment and async / queuing patterns.",
+      "Vector or graph databases / knowledge graphs.",
+      "Startup or consulting experience in client-facing settings."],
     offer_h:"What we offer",
     offer:["100% remote, full-time.","Challenging projects with state-of-the-art AI.",
       "Small, fast, high-impact team.","Real growth and continuous learning."],
     proc_h:"The process",
     steps:[["1","You apply","2 min: 3 questions + your CV."],["2","WhatsApp","We chat and check the fit."],
       ["3","Tech test","A practical challenge with a deadline."],["4","Interview","Final chat with the team."]],
+    details_h:"Details", details:["💼 Type: contracted","🧭 Level: experienced","📍 100% remote","🕐 Full-time"],
+    eo:"raaamp is an Equal Opportunities Employer, committed to diversity and inclusion.",
     footer:"© raaamp · AI & Automation for Companies",
     f_title:"Apply for this role", f_sub:"Takes under 2 minutes. We'll reach out on WhatsApp.",
     f_name:"Full name", f_wa:"WhatsApp (with country code)", f_email:"Email (optional)",
@@ -274,7 +320,9 @@ function render(){
   });
   // chips
   document.getElementById("chips").innerHTML = t().chips.map(c=>`<span class="chip">${c}</span>`).join("");
-  fillList("role_list", t().role); fillList("req_list", t().req); fillList("offer_list", t().offer);
+  fillList("role_list", t().role); fillList("req_list", t().req);
+  fillList("pref_list", t().pref); fillList("offer_list", t().offer);
+  document.getElementById("details").innerHTML = t().details.map(c=>`<span class="chip">${c}</span>`).join("");
   document.getElementById("steps").innerHTML = t().steps.map(s=>
     `<div class="step"><div class="n">${s[0]}</div><div class="t">${s[1]}</div><div class="d">${s[2]}</div></div>`).join("");
   // knockout questions
