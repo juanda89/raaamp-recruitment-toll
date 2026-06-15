@@ -50,6 +50,8 @@ Deno.serve(async (req) => {
     const nivelIngles = ["basico", "intermedio", "avanzado"].includes(nivelInglesRaw)
       ? nivelInglesRaw : null;
     const cefr = str(form.get("nivel_ingles_cefr"));
+    const salarioRaw = Number(str(form.get("expectativa_salarial")));
+    const expectativaSalarial = isFinite(salarioRaw) && salarioRaw > 0 ? salarioRaw : null;
 
     // --- Crear candidato en APLICADO ---
     const { data: candidate, error } = await sb.from("rec_candidates").insert({
@@ -63,7 +65,14 @@ Deno.serve(async (req) => {
       knockout_respuestas: knockout,
       knockout_passed: knockoutPassed,
       nivel_ingles: nivelIngles,
-      cualificacion_extra: cefr ? { nivel_ingles_cefr: cefr } : {},
+      expectativa_salarial: expectativaSalarial,
+      cualificacion_extra: {
+        ...(cefr ? { nivel_ingles_cefr: cefr } : {}),
+        ...(expectativaSalarial != null
+          ? { salario_periodo: str(form.get("salario_periodo")) || "anual",
+              salario_moneda: str(form.get("salario_moneda")) || "USD" }
+          : {}),
+      },
       estado: "APLICADO",
     }).select("*").single();
     if (error) throw error;

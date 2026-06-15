@@ -202,6 +202,7 @@
         <div class="field"><label class="req" data-i18n="f_email"></label><input name="email" type="email" required></div>
         <div class="field" id="kobox"></div>
         <div class="field"><label class="req" data-i18n="f_english"></label><select id="english"></select></div>
+        <div class="field"><label class="req" data-i18n="f_salary"></label><input id="salary" type="number" min="0" inputmode="numeric"></div>
         <div class="field">
           <label class="req" data-i18n="f_cv"></label>
           <label class="file" for="cv"><span class="upic">📄</span><span id="cvLabel"></span></label>
@@ -283,9 +284,10 @@ const I18N = {
         "¿Puedes trabajar tiempo completo y en dedicación exclusiva?"],
     yes:"Sí", no:"No",
     f_english:"Nivel de inglés (MCER)", english_ph:"Selecciona tu nivel",
+    f_salary:"Expectativa salarial anual (USD)", f_salary_ph:"Ej. 24000",
     english_opts:[["A1","A1 — Principiante"],["A2","A2 — Básico"],["B1","B1 — Intermedio"],["B2","B2 — Intermedio alto"],["C1","C1 — Avanzado"],["C2","C2 — Bilingüe / Nativo"]],
     f_done_h:"¡Aplicación recibida!", f_done_p:"Gracias por aplicar. Te escribiremos por WhatsApp con los siguientes pasos.",
-    err_ko:"Responde las preguntas obligatorias.", err_email:"Ingresa un correo válido.", err_english:"Selecciona tu nivel de inglés.", err_phone:"Revisa tu número de teléfono.", err_consent:"Necesitamos tu consentimiento.", err_cv:"Adjunta tu hoja de vida.",
+    err_ko:"Responde las preguntas obligatorias.", err_email:"Ingresa un correo válido.", err_english:"Selecciona tu nivel de inglés.", err_salary:"Ingresa tu expectativa salarial.", err_phone:"Revisa tu número de teléfono.", err_consent:"Necesitamos tu consentimiento.", err_cv:"Adjunta tu hoja de vida.",
     err_req:"Completa los campos obligatorios.", sending:"Enviando..."
   },
   en:{
@@ -335,9 +337,10 @@ const I18N = {
         "Can you work full-time and exclusively?"],
     yes:"Yes", no:"No",
     f_english:"English level (CEFR)", english_ph:"Select your level",
+    f_salary:"Annual salary expectation (USD)", f_salary_ph:"e.g. 24000",
     english_opts:[["A1","A1 — Beginner"],["A2","A2 — Elementary"],["B1","B1 — Intermediate"],["B2","B2 — Upper-intermediate"],["C1","C1 — Advanced"],["C2","C2 — Proficient / Native"]],
     f_done_h:"Application received!", f_done_p:"Thanks for applying. We'll message you on WhatsApp with next steps.",
-    err_ko:"Please answer the required questions.", err_email:"Please enter a valid email.", err_english:"Please select your English level.", err_phone:"Please check your phone number.", err_consent:"We need your consent.", err_cv:"Please attach your resume.",
+    err_ko:"Please answer the required questions.", err_email:"Please enter a valid email.", err_english:"Please select your English level.", err_salary:"Please enter your salary expectation.", err_phone:"Please check your phone number.", err_consent:"We need your consent.", err_cv:"Please attach your resume.",
     err_req:"Please complete the required fields.", sending:"Sending..."
   }
 };
@@ -366,6 +369,7 @@ function render(){
   const eng=document.getElementById("english"); const cur=eng.value;
   eng.innerHTML = `<option value="" disabled ${cur?"":"selected"}>${t().english_ph}</option>` +
     t().english_opts.map(o=>`<option value="${o[0]}" ${cur===o[0]?"selected":""}>${o[1]}</option>`).join("");
+  document.getElementById("salary").placeholder = t().f_salary_ph;
   document.getElementById("cvLabel").textContent = cv.files[0] ? "📎 "+cv.files[0].name : t().f_cv_ph;
   document.querySelectorAll("#lang button").forEach(b=>b.classList.toggle("on", b.dataset.l===lang));
 }
@@ -409,6 +413,8 @@ form.addEventListener("submit", async e=>{
   if(Object.keys(answers).length<2) return showErr(t().err_ko);
   const engVal=document.getElementById("english").value;
   if(!engVal) return showErr(t().err_english);
+  const salaryVal=Number(document.getElementById("salary").value);
+  if(!salaryVal||salaryVal<=0) return showErr(t().err_salary);
   if(!document.getElementById("optin").checked) return showErr(t().err_consent);
   if(!cv.files[0]) return showErr(t().err_cv);
   btn.disabled=true; btn.textContent=t().sending;
@@ -423,6 +429,7 @@ form.addEventListener("submit", async e=>{
     fd.append("fuente",fuente); fd.append("utm",JSON.stringify(utm));
     fd.append("knockout",JSON.stringify(ko));
     fd.append("nivel_ingles",nivel_ingles); fd.append("nivel_ingles_cefr",engVal);
+    fd.append("expectativa_salarial",String(salaryVal)); fd.append("salario_periodo","anual"); fd.append("salario_moneda","USD");
     fd.append("cv",cv.files[0]);
     const res=await fetch(`${C.FUNCTIONS_URL}/ingest-lead`,{
       method:"POST", headers:{apikey:C.ANON_KEY,Authorization:`Bearer ${C.ANON_KEY}`}, body:fd });
