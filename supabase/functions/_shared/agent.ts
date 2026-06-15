@@ -1,120 +1,123 @@
-// Agente conversacional de WhatsApp (PRD 9.5 / 7).
-// Habla como un reclutador humano: cálido, breve (estilo WhatsApp), responde
-// dudas del candidato y reencauza hacia el objetivo. NO repite lo que ya se
-// capturó en el formulario (inglés, expectativa salarial, etc.).
+// Agente conversacional de WhatsApp con HERRAMIENTAS (tool-using) — PRD 9.5 / 7.
+// Habla como un reclutador humano (cálido, breve, sin sonar a bot), responde
+// dudas y reencauza. Maneja casos de excepción vía tools: corregir correo,
+// reenviar la prueba, compartir/reagendar la entrevista, escalar a humano, y
+// registrar/completar la cualificación. NO repite datos del formulario.
 //
-// Usa OpenRouter (mismo modelo que el screening). Sin API key -> respuesta
-// mínima de respaldo que completa la cualificación.
+// Usa OpenRouter (tool calling estilo OpenAI). Sin API key -> respuesta mínima.
 
 const API_KEY = Deno.env.get("OPENROUTER_API_KEY") ?? Deno.env.get("ANTHROPIC_API_KEY");
 const MODEL = Deno.env.get("LLM_MODEL") ?? "google/gemini-2.5-flash";
 const BASE_URL = Deno.env.get("LLM_BASE_URL") ?? "https://openrouter.ai/api/v1";
 
-export interface AgentTurn {
-  reply: string;
-  fields: {
-    disponibilidad_inicio?: string | null;
-    ubicacion?: string | null;
-    modalidad?: "remoto" | "hibrido" | "presencial" | null;
-    otros_procesos?: string | null;
-  };
-  complete: boolean;
+export type ChatMsg = { role: "user" | "assistant"; content: string };
+
+export interface AgentHandlers {
+  actualizar_correo(a: { email: string }): Promise<string>;
+  reenviar_prueba(): Promise<string>;
+  compartir_agenda(): Promise<string>;
+  registrar_cualificacion(a: {
+    disponibilidad_inicio?: string; ubicacion?: string; modalidad?: string;
+  }): Promise<string>;
+  completar_cualificacion(): Promise<string>;
+  escalar_humano(a: { motivo: string }): Promise<string>;
 }
 
-export interface AgentInput {
+export interface AgentCtx {
   nombre: string;
-  cargo: string;
   empresa: string;
-  known: Record<string, string>; // datos ya capturados (inglés, salario, etc.)
-  yaTengo: { disponibilidad_inicio: boolean; ubicacion: boolean };
-  history: { role: "user" | "assistant"; content: string }[];
+  cargo: string;
+  estado: string;               // etapa actual del candidato
+  known: Record<string, string>;// datos ya capturados (no re-preguntar)
+  faltan: string[];             // datos a conseguir en cualificación
+  tieneAgenda: boolean;
 }
 
-const ROLE_FACTS = `
-Datos del cargo (para responder dudas del candidato, con naturalidad y sin sonar a folleto):
-- Cargo: AI and Automation Specialist en raaamp (empresa de IA y automatización).
-- 100% remoto, tiempo completo.
-- Salario: USD 1.500–2.500 al mes según experiencia.
-- Stack: n8n, Make, Python, APIs (REST/GraphQL), webhooks, LLMs, agentes, RAG; desarrollo asistido por IA (Claude Code, Codex) y spec-driven.
-- Proceso: una prueba técnica práctica y luego una entrevista final con el equipo.`;
+const TOOLS = [
+  fn("actualizar_correo", "Corrige/actualiza el correo del candidato cuando dice que el suyo está mal o que no le llegó algo. Tras llamarlo, reenvía lo pendiente.",
+    { email: { type: "string", description: "Correo electrónico nuevo y válido" } }, ["email"]),
+  fn("reenviar_prueba", "Reenvía la prueba técnica al correo registrado del candidato. Úsalo si dice que no le llegó.", {}, []),
+  fn("compartir_agenda", "Comparte el enlace para agendar o REPROGRAMAR la entrevista final (sirve también para no-shows).", {}, []),
+  fn("registrar_cualificacion", "Guarda datos de cualificación que el candidato mencione (disponibilidad/fecha de inicio, ciudad y zona horaria, modalidad).",
+    { disponibilidad_inicio: { type: "string" }, ubicacion: { type: "string" }, modalidad: { type: "string", enum: ["remoto", "hibrido", "presencial"] } }, []),
+  fn("completar_cualificacion", "Marca la cualificación como completa cuando YA tienes disponibilidad de inicio y ciudad+zona horaria. Dispara el envío de la prueba por correo.", {}, []),
+  fn("escalar_humano", "Deriva al responsable humano cuando el candidato lo pide o hay algo fuera de tu alcance.",
+    { motivo: { type: "string" } }, ["motivo"]),
+];
 
-export async function qualifyAgent(input: AgentInput): Promise<AgentTurn> {
-  // Lo único que falta por conversación: disponibilidad/inicio y ubicación.
-  const faltan: string[] = [];
-  if (!input.yaTengo.disponibilidad_inicio) faltan.push("su disponibilidad o posible fecha de inicio (preaviso)");
-  if (!input.yaTengo.ubicacion) faltan.push("su ciudad y zona horaria");
+function fn(name: string, description: string, props: Record<string, unknown>, required: string[]) {
+  return { type: "function", function: { name, description, parameters: { type: "object", properties: props, required } } };
+}
 
-  if (!API_KEY) {
-    return {
-      reply: faltan.length
-        ? `Genial. Cuéntame, ${input.nombre.split(" ")[0]}: ¿desde qué ciudad trabajas y para cuándo estarías disponible para empezar?`
-        : "¡Perfecto! Con eso seguimos, te comparto la prueba técnica enseguida.",
-      fields: {},
-      complete: faltan.length === 0,
-    };
-  }
+export function buildSystem(ctx: AgentCtx): string {
+  const known = Object.entries(ctx.known).map(([k, v]) => `- ${k}: ${v}`).join("\n") || "- (sin datos)";
+  const objetivo = ctx.estado === "CUALIFICACION_WA"
+    ? (ctx.faltan.length
+        ? `Conseguir, de forma natural, lo que falta: ${ctx.faltan.join(" y ")}. Cuando ya tengas disponibilidad de inicio y ciudad+zona horaria, llama a registrar_cualificacion con lo recogido y luego completar_cualificacion.`
+        : "Ya tienes todo; llama a completar_cualificacion.")
+    : "Acompañar al candidato en su etapa actual y resolver lo que necesite (dudas, correo, reenvíos, reprogramar).";
 
-  const known = Object.entries(input.known)
-    .map(([k, v]) => `- ${k}: ${v}`).join("\n");
-
-  const system =
-`Eres el asistente de selección de ${input.empresa} para el cargo "${input.cargo}". Hablas por WhatsApp con ${input.nombre}.
-Tu estilo: humano, cálido y cercano, MUY breve (1–2 frases por mensaje), natural. Puedes usar un emoji ocasional. Escribe en español.
-NUNCA suenes a bot: nada de listas, ni "(sí/no)", ni formularios. Conversa como una persona real.
+  return `Eres el asistente de selección de ${ctx.empresa} para el cargo "${ctx.cargo}". Hablas por WhatsApp con ${ctx.nombre}.
+TONO: humano, cálido, cercano y MUY breve (1–2 frases por mensaje). Natural, como una persona real. Español. Un emoji ocasional está bien.
+NUNCA suenes a bot: nada de listas numeradas, ni "(sí/no)", ni formularios. No saludes en cada mensaje si ya están conversando.
 
 YA SABES esto del candidato (NO lo vuelvas a preguntar):
-${known || "- (sin datos)"}
+${known}
 
-OBJETIVO: de forma natural, conseguir lo que falta: ${faltan.length ? faltan.join(" y ") : "nada, ya tienes todo"}.
-- Pregunta de a poco, sin interrogar. Si el candidato pregunta algo (sueldo, empresa, proceso, stack, horario), respóndele breve y con gusto, y luego retoma con suavidad lo que necesitas.
-- No repitas preguntas ya respondidas en la conversación.
-- Cuando ya tengas disponibilidad/inicio y ciudad+zona horaria, cierra cálidamente diciendo que le compartes la prueba técnica, y marca complete=true.
-${ROLE_FACTS}
+ETAPA ACTUAL: ${ctx.estado}
+OBJETIVO AHORA: ${objetivo}
 
-Responde EXCLUSIVAMENTE un JSON válido, sin texto extra, con esta forma:
-{"reply":"<tu mensaje de WhatsApp>","fields":{"disponibilidad_inicio":"<texto|null>","ubicacion":"<ciudad y zona horaria|null>","modalidad":"remoto|hibrido|presencial|null","otros_procesos":"<texto|null>"},"complete":<true|false>}
-En "fields" pon solo lo que hayas podido deducir de la conversación hasta ahora (lo no mencionado déjalo null).`;
+CONOCIMIENTO (responde dudas con esto, breve y sin sonar a folleto):
+- La PRUEBA TÉCNICA se envía por CORREO, no por WhatsApp. Por aquí solo la mencionas. Si el candidato dice que no le llegó, primero verifica que el correo esté bien (puede estar mal escrito): usa actualizar_correo y luego reenviar_prueba.
+- La prueba NO es remunerada/paga: es parte del proceso de selección.
+- La entrevista final se agenda con un enlace (Google Calendar / Meet). Para agendar, reprogramar o si hubo no-show, usa compartir_agenda (es el mismo enlace).
+- Cargo: AI and Automation Specialist en ${ctx.empresa}. 100% remoto, tiempo completo. Salario USD 1.500–2.500 al mes según experiencia. Stack: n8n, Make, Python, APIs REST/GraphQL, webhooks, LLMs, agentes, RAG; desarrollo asistido por IA (Claude Code, Codex) y spec-driven. Proceso: prueba técnica y luego entrevista final.
 
-  const messages = [
-    { role: "system", content: system },
-    ...input.history.slice(-16), // últimos turnos
-  ];
+REGLAS:
+- Si el candidato pregunta algo, respóndele con gusto y luego retoma con suavidad lo que necesitas.
+- Usa las herramientas para acciones reales (no inventes que hiciste algo: ejecútalo con la tool).
+- Si te piden hablar con un humano o algo se sale de tu alcance, usa escalar_humano.
+- Tras una herramienta, confirma al candidato de forma natural lo que hiciste.`;
+}
 
-  try {
+export async function runConversation(
+  ctx: AgentCtx, history: ChatMsg[], handlers: AgentHandlers,
+): Promise<string> {
+  if (!API_KEY) {
+    return ctx.faltan.length
+      ? `Cuéntame, ${first(ctx.nombre)}: ¿desde qué ciudad trabajas y para cuándo podrías empezar?`
+      : "¡Listo! Te envío la prueba al correo. 📧";
+  }
+
+  const messages: any[] = [{ role: "system", content: buildSystem(ctx) }, ...history.slice(-16)];
+
+  for (let i = 0; i < 5; i++) {
     const res = await fetch(`${BASE_URL}/chat/completions`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${API_KEY}`,
-        "Content-Type": "application/json",
-        "X-Title": "raaamp recruiting agent",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages,
-        max_tokens: 500,
-        temperature: 0.6,
-        response_format: { type: "json_object" },
-      }),
+      headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json", "X-Title": "raaamp recruiting agent" },
+      body: JSON.stringify({ model: MODEL, messages, tools: TOOLS, tool_choice: "auto", temperature: 0.6, max_tokens: 600 }),
     });
-    if (!res.ok) throw new Error(`agent LLM ${res.status}: ${await res.text()}`);
+    if (!res.ok) { console.error("agent LLM", res.status, await res.text()); break; }
     const data = await res.json();
-    const parsed = JSON.parse(extractJson(data?.choices?.[0]?.message?.content ?? "{}"));
-    return {
-      reply: String(parsed.reply ?? "¿Me cuentas un poco más?"),
-      fields: parsed.fields ?? {},
-      complete: Boolean(parsed.complete),
-    };
-  } catch (e) {
-    console.error("qualifyAgent error:", e);
-    return {
-      reply: `Perdona, ${input.nombre.split(" ")[0]}, se me cruzó un cable 😅. ¿Me repites tu última idea?`,
-      fields: {},
-      complete: false,
-    };
+    const m = data?.choices?.[0]?.message;
+    if (!m) break;
+
+    if (m.tool_calls?.length) {
+      messages.push(m);
+      for (const tc of m.tool_calls) {
+        let result = "ok";
+        try {
+          const args = tc.function?.arguments ? JSON.parse(tc.function.arguments) : {};
+          const h = (handlers as any)[tc.function?.name];
+          result = h ? await h(args) : `herramienta desconocida: ${tc.function?.name}`;
+        } catch (e) { result = "error: " + String(e); }
+        messages.push({ role: "tool", tool_call_id: tc.id, content: result });
+      }
+      continue; // pedir respuesta final al modelo con los resultados
+    }
+    return (m.content as string) || "…";
   }
+  return "Dame un momento y te confirmo 🙌";
 }
 
-function extractJson(s: string): string {
-  const m = s.match(/\{[\s\S]*\}/);
-  return m ? m[0] : "{}";
-}
+function first(n: string): string { return n.split(" ")[0]; }

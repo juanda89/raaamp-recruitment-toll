@@ -1,27 +1,28 @@
 // =====================================================================
-//  whatsapp-webhook  (PRD 9.5 / 7) — Agente de WhatsApp CONVERSACIONAL.
+//  whatsapp-webhook  (PRD 9.5 / 7) — Agente de WhatsApp con HERRAMIENTAS.
 //  GET  -> verificación del webhook (Meta/Kapso).
-//  POST -> mensajes entrantes: registra la conversación y, si el candidato
-//          está en cualificación, deja que un agente con IA conduzca la charla
-//          (humano, breve, responde dudas y reencauza). Solo pide lo que falta;
-//          inglés y expectativa salarial ya vienen del formulario.
+//  POST -> mensajes entrantes: registra la conversación y deja que un agente
+//          con IA conduzca la charla como un humano y resuelva excepciones
+//          (corregir correo, reenviar prueba, reprogramar, escalar, cualificar).
 // =====================================================================
 import { serviceClient, getSettings, type Candidate } from "../_shared/supabase.ts";
 import { sendWhatsappText } from "../_shared/whatsapp.ts";
-import { qualifyAgent } from "../_shared/agent.ts";
-import { afterQualification } from "../_shared/pipeline.ts";
+import { runConversation, type AgentHandlers, type ChatMsg } from "../_shared/agent.ts";
+import { afterQualification, resendPruebaEmail } from "../_shared/pipeline.ts";
+import { notify } from "../_shared/notify.ts";
 
 const VERIFY_TOKEN = Deno.env.get("WHATSAPP_VERIFY_TOKEN") ?? "raaamp-verify";
 
+// Etapas donde el agente conversa con el candidato.
+const ACTIVE = new Set([
+  "CUALIFICACION_WA", "PRUEBA_TECNICA", "TEST_PERSONALIDAD", "FINALISTA", "ENTREVISTA_FINAL",
+]);
+
 Deno.serve(async (req) => {
   const url = new URL(req.url);
-
-  // --- Verificación del webhook (estilo Meta) ---
   if (req.method === "GET") {
-    if (
-      url.searchParams.get("hub.mode") === "subscribe" &&
-      url.searchParams.get("hub.verify_token") === VERIFY_TOKEN
-    ) {
+    if (url.searchParams.get("hub.mode") === "subscribe" &&
+        url.searchParams.get("hub.verify_token") === VERIFY_TOKEN) {
       return new Response(url.searchParams.get("hub.challenge") ?? "", { status: 200 });
     }
     return new Response("forbidden", { status: 403 });
@@ -31,7 +32,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const msg = extractInbound(body);
-    if (!msg) return new Response("ok", { status: 200 }); // estados de entrega, etc.
+    if (!msg) return new Response("ok", { status: 200 });
 
     const sb = serviceClient();
     const candidate = await findByPhone(sb, msg.from);
@@ -40,94 +41,106 @@ Deno.serve(async (req) => {
         candidate_id: candidate.id, direccion: "entrante", canal: "whatsapp",
         cuerpo: msg.text, provider_id: msg.id, estado_envio: "recibido",
       });
-      if (candidate.estado === "CUALIFICACION_WA") {
-        await runAgent(sb, candidate);
-      }
+      if (ACTIVE.has(candidate.estado)) await runAgent(sb, candidate);
     }
-    return new Response("ok", { status: 200 }); // responder 200 rápido
+    return new Response("ok", { status: 200 });
   } catch (e) {
     console.error(e);
     return new Response("ok", { status: 200 });
   }
 });
 
-// ---------------------------------------------------------------------
-//  Agente conversacional de cualificación
-// ---------------------------------------------------------------------
-async function runAgent(sb: any, c: Candidate) {
+async function runAgent(sb: any, c0: Candidate) {
   const settings = await getSettings(sb);
 
-  // Historial de la conversación (para contexto).
+  // Historial de conversación.
   const { data: msgs } = await sb.from("rec_messages")
-    .select("direccion, cuerpo").eq("candidate_id", c.id)
-    .order("created_at", { ascending: true });
-  const history = (msgs ?? []).map((m: any) => ({
-    role: m.direccion === "saliente" ? "assistant" : "user",
-    content: m.cuerpo as string,
+    .select("direccion, cuerpo").eq("candidate_id", c0.id).order("created_at", { ascending: true });
+  const history: ChatMsg[] = (msgs ?? []).map((m: any) => ({
+    role: m.direccion === "saliente" ? "assistant" : "user", content: m.cuerpo as string,
   }));
 
-  // Lo que YA sabemos del formulario (no se vuelve a preguntar).
-  const extra = (c.cualificacion_extra ?? {}) as Record<string, unknown>;
+  // Datos ya conocidos (no re-preguntar).
+  const extra = (c0.cualificacion_extra ?? {}) as Record<string, unknown>;
   const known: Record<string, string> = {
     "Experiencia con automatización (n8n/Make/Python)": "sí",
     "Disponible tiempo completo y en exclusividad": "sí",
   };
-  if (c.nivel_ingles) {
-    const cefr = extra.nivel_ingles_cefr ? ` (${extra.nivel_ingles_cefr})` : "";
-    known["Nivel de inglés"] = `${c.nivel_ingles}${cefr}`;
+  if (c0.nivel_ingles) {
+    known["Nivel de inglés"] = `${c0.nivel_ingles}${extra.nivel_ingles_cefr ? ` (${extra.nivel_ingles_cefr})` : ""}`;
   }
-  if (c.expectativa_salarial != null) {
-    known["Expectativa salarial"] = `USD ${c.expectativa_salarial} al año`;
+  if (c0.expectativa_salarial != null) known["Expectativa salarial"] = `USD ${c0.expectativa_salarial} al año`;
+  if (c0.email) known["Correo"] = c0.email;
+
+  const faltan: string[] = [];
+  if (c0.estado === "CUALIFICACION_WA") {
+    if (!c0.disponibilidad_inicio) faltan.push("su disponibilidad / posible fecha de inicio");
+    if (!c0.ubicacion) faltan.push("su ciudad y zona horaria");
   }
 
-  const turn = await qualifyAgent({
-    nombre: c.nombre,
-    cargo: settings.cargo,
-    empresa: settings.empresa,
-    known,
-    yaTengo: {
-      disponibilidad_inicio: Boolean(c.disponibilidad_inicio),
-      ubicacion: Boolean(c.ubicacion),
+  const reload = async (): Promise<Candidate> => {
+    const { data } = await sb.from("rec_candidates").select("*").eq("id", c0.id).single();
+    return data as Candidate;
+  };
+
+  const handlers: AgentHandlers = {
+    async actualizar_correo({ email }) {
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email ?? "")) return "El correo no parece válido, pídelo de nuevo.";
+      await sb.from("rec_candidates").update({ email }).eq("id", c0.id);
+      await sb.from("rec_candidate_events").insert({
+        candidate_id: c0.id, tipo: "nota", actor: "candidato",
+        detalle: { accion: "actualizar_correo", email },
+      });
+      return `Correo actualizado a ${email}.`;
     },
-    history,
-  });
+    async reenviar_prueba() {
+      const c = await reload();
+      if (c.estado !== "PRUEBA_TECNICA") return "Aún no corresponde la prueba en esta etapa.";
+      if (!c.email) return "No hay correo registrado; pídelo primero y usa actualizar_correo.";
+      return await resendPruebaEmail(sb, c, settings);
+    },
+    async compartir_agenda() {
+      if (!settings.enlace_agenda) return "El enlace de agenda no está configurado todavía; escala a un humano.";
+      return `Comparte este enlace para agendar/reprogramar: ${settings.enlace_agenda}`;
+    },
+    async registrar_cualificacion(a) {
+      const patch: Record<string, unknown> = {};
+      if (a.disponibilidad_inicio) patch.disponibilidad_inicio = a.disponibilidad_inicio;
+      if (a.ubicacion) patch.ubicacion = a.ubicacion;
+      if (a.modalidad) patch.modalidad = a.modalidad;
+      if (Object.keys(patch).length) await sb.from("rec_candidates").update(patch).eq("id", c0.id);
+      return "Datos de cualificación guardados.";
+    },
+    async completar_cualificacion() {
+      const c = await reload();
+      if (c.estado !== "CUALIFICACION_WA") return "La cualificación ya no está en curso.";
+      if (!c.disponibilidad_inicio || !c.ubicacion) return "Aún falta disponibilidad o ubicación; pídelas antes de completar.";
+      await afterQualification(sb, c, settings, /* notifyWhatsapp */ false);
+      return "Cualificación completa. Prueba técnica enviada al correo del candidato.";
+    },
+    async escalar_humano({ motivo }) {
+      const c = await reload();
+      await sb.from("rec_candidates").update({ flag_revision: true, motivo_revision: motivo ?? "Solicitud del candidato" }).eq("id", c0.id);
+      await notify(sb, c, settings, "I01", { motivo: motivo ?? "Solicitud del candidato" });
+      return "Listo, avisé a una persona del equipo para que te ayude.";
+    },
+  };
 
-  // Persistir lo que el agente haya recogido.
-  const patch: Record<string, unknown> = {};
-  if (turn.fields.disponibilidad_inicio) patch.disponibilidad_inicio = turn.fields.disponibilidad_inicio;
-  if (turn.fields.ubicacion) patch.ubicacion = turn.fields.ubicacion;
-  if (turn.fields.modalidad) patch.modalidad = turn.fields.modalidad;
-  if (turn.fields.otros_procesos) {
-    patch.cualificacion_extra = { ...extra, otros_procesos: turn.fields.otros_procesos };
-  }
-  if (Object.keys(patch).length) {
-    await sb.from("rec_candidates").update(patch).eq("id", c.id);
-  }
+  const reply = await runConversation(
+    { nombre: c0.nombre, empresa: settings.empresa, cargo: settings.cargo, estado: c0.estado, known, faltan, tieneAgenda: Boolean(settings.enlace_agenda) },
+    history, handlers,
+  );
 
-  // Enviar la respuesta del agente.
-  if (turn.reply) {
-    const r = await sendWhatsappText(c.whatsapp, turn.reply);
+  if (reply) {
+    const r = await sendWhatsappText(c0.whatsapp, reply);
     await sb.from("rec_messages").insert({
-      candidate_id: c.id, direccion: "saliente", canal: "whatsapp",
-      cuerpo: turn.reply,
-      provider_id: r.provider_id,
-      estado_envio: r.ok ? (r.simulado ? "simulado" : "enviado") : "fallido",
+      candidate_id: c0.id, direccion: "saliente", canal: "whatsapp", cuerpo: reply,
+      provider_id: r.provider_id, estado_envio: r.ok ? (r.simulado ? "simulado" : "enviado") : "fallido",
       payload: r.error ? { error: r.error } : null,
     });
   }
-
-  // Si terminó la cualificación, evaluar filtros y enviar la prueba técnica.
-  if (turn.complete) {
-    const { data: fresh } = await sb.from("rec_candidates").select("*").eq("id", c.id).single();
-    if (fresh && fresh.estado === "CUALIFICACION_WA") {
-      await afterQualification(sb, fresh, settings);
-    }
-  }
 }
 
-// ---------------------------------------------------------------------
-//  Helpers
-// ---------------------------------------------------------------------
 function extractInbound(body: any): { from: string; text: string; id: string } | null {
   try {
     const m = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];

@@ -18,6 +18,7 @@ export function buildVars(
 ): Record<string, string> {
   const vars: Record<string, string | null | undefined> = {
     nombre: c.nombre,
+    email: c.email,
     cargo: s.cargo,
     empresa: s.empresa,
     enlace_tablero: s.enlace_tablero ?? "",

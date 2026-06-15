@@ -143,6 +143,7 @@ export async function afterQualification(
   sb: SupabaseClient,
   candidate: Candidate,
   settings: Settings,
+  notifyWhatsapp = true,
 ): Promise<Candidate> {
   const motivos: string[] = [];
 
@@ -170,7 +171,7 @@ export async function afterQualification(
     return c; // se mantiene en CUALIFICACION_WA hasta que el responsable decida
   }
 
-  return sendPruebaTecnica(sb, candidate, settings);
+  return sendPruebaTecnica(sb, candidate, settings, notifyWhatsapp);
 }
 
 // ---------------------------------------------------------------------
@@ -180,6 +181,7 @@ export async function sendPruebaTecnica(
   sb: SupabaseClient,
   candidate: Candidate,
   settings: Settings,
+  notifyWhatsapp = true,
 ): Promise<Candidate> {
   const venceAt = addHours(settings.plazo_prueba_horas);
   const token = await makeToken(sb, candidate.id, "prueba", venceAt);
@@ -190,12 +192,37 @@ export async function sendPruebaTecnica(
     prueba_enviada_at: new Date().toISOString(),
     prueba_vence_at: venceAt,
   });
-  await notify(sb, c, settings, "C04", {
+  const vars = { enlace_prueba: publicUrl("/prueba", token), fecha_limite: fmt(venceAt) };
+  await notify(sb, c, settings, "E_PRUEBA", vars);          // la prueba va por CORREO
+  if (notifyWhatsapp) await notify(sb, c, settings, "C04", vars); // WhatsApp solo la menciona
+  await scheduleReminders(sb, c, settings, "prueba", venceAt, ["C05", "C06"]);
+  return c;
+}
+
+/** Reenvía por correo la prueba técnica (correo equivocado / no llegó). */
+export async function resendPruebaEmail(
+  sb: SupabaseClient,
+  candidate: Candidate,
+  settings: Settings,
+): Promise<string> {
+  let token: string;
+  let venceAt = candidate.prueba_vence_at ?? addHours(settings.plazo_prueba_horas);
+  const { data } = await sb.from("rec_access_tokens")
+    .select("token, expira_at").eq("candidate_id", candidate.id).eq("proposito", "prueba")
+    .gt("expira_at", new Date().toISOString()).order("created_at", { ascending: false }).limit(1);
+  if (data?.[0]) {
+    token = data[0].token as string;
+    venceAt = data[0].expira_at as string;
+  } else {
+    venceAt = addHours(settings.plazo_prueba_horas);
+    token = await makeToken(sb, candidate.id, "prueba", venceAt);
+    await update(sb, candidate.id, { prueba_vence_at: venceAt });
+  }
+  await notify(sb, candidate, settings, "E_PRUEBA", {
     enlace_prueba: publicUrl("/prueba", token),
     fecha_limite: fmt(venceAt),
   });
-  await scheduleReminders(sb, c, settings, "prueba", venceAt, ["C05", "C06"]);
-  return c;
+  return `Prueba reenviada al correo ${candidate.email ?? "(sin correo)"}.`;
 }
 
 // ---------------------------------------------------------------------
