@@ -199,7 +199,7 @@
         <div class="field"><label class="req" data-i18n="f_wa"></label>
           <input id="wanum" type="tel" inputmode="tel" placeholder="300 123 4567">
         </div>
-        <div class="field"><label data-i18n="f_email"></label><input name="email" type="email"></div>
+        <div class="field"><label class="req" data-i18n="f_email"></label><input name="email" type="email" required></div>
         <div class="field" id="kobox"></div>
         <div class="field"><label class="req" data-i18n="f_english"></label><select id="english"></select></div>
         <div class="field">
@@ -275,7 +275,7 @@ const I18N = {
     eo:"raaamp es un empleador que promueve la igualdad de oportunidades; valoramos la diversidad y la inclusión.",
     footer:"© raaamp · AI & Automation for Companies",
     f_title:"Aplica a la vacante", f_sub:"Toma menos de 2 minutos. Te contactaremos por WhatsApp.",
-    f_name:"Nombre completo", f_wa:"WhatsApp (con indicativo)", f_email:"Correo (opcional)",
+    f_name:"Nombre completo", f_wa:"WhatsApp (con indicativo)", f_email:"Correo electrónico",
     f_cv:"Hoja de vida (PDF)", f_cv_ph:"Haz clic para adjuntar tu CV",
     f_consent:"Autorizo a raaamp a contactarme por WhatsApp y el tratamiento de mis datos (Ley 1581 de 2012).",
     f_send:"Enviar aplicación",
@@ -285,7 +285,7 @@ const I18N = {
     f_english:"Nivel de inglés (MCER)", english_ph:"Selecciona tu nivel",
     english_opts:[["A1","A1 — Principiante"],["A2","A2 — Básico"],["B1","B1 — Intermedio"],["B2","B2 — Intermedio alto"],["C1","C1 — Avanzado"],["C2","C2 — Bilingüe / Nativo"]],
     f_done_h:"¡Aplicación recibida!", f_done_p:"Gracias por aplicar. Te escribiremos por WhatsApp con los siguientes pasos.",
-    err_ko:"Responde las preguntas obligatorias.", err_english:"Selecciona tu nivel de inglés.", err_phone:"Revisa tu número de teléfono.", err_consent:"Necesitamos tu consentimiento.", err_cv:"Adjunta tu hoja de vida.",
+    err_ko:"Responde las preguntas obligatorias.", err_email:"Ingresa un correo válido.", err_english:"Selecciona tu nivel de inglés.", err_phone:"Revisa tu número de teléfono.", err_consent:"Necesitamos tu consentimiento.", err_cv:"Adjunta tu hoja de vida.",
     err_req:"Completa los campos obligatorios.", sending:"Enviando..."
   },
   en:{
@@ -327,7 +327,7 @@ const I18N = {
     eo:"raaamp is an Equal Opportunities Employer, committed to diversity and inclusion.",
     footer:"© raaamp · AI & Automation for Companies",
     f_title:"Apply for this role", f_sub:"Takes under 2 minutes. We'll reach out on WhatsApp.",
-    f_name:"Full name", f_wa:"WhatsApp (with country code)", f_email:"Email (optional)",
+    f_name:"Full name", f_wa:"WhatsApp (with country code)", f_email:"Email",
     f_cv:"Resume (PDF)", f_cv_ph:"Click to attach your CV",
     f_consent:"I authorize raaamp to contact me on WhatsApp and to process my data.",
     f_send:"Submit application",
@@ -337,7 +337,7 @@ const I18N = {
     f_english:"English level (CEFR)", english_ph:"Select your level",
     english_opts:[["A1","A1 — Beginner"],["A2","A2 — Elementary"],["B1","B1 — Intermediate"],["B2","B2 — Upper-intermediate"],["C1","C1 — Advanced"],["C2","C2 — Proficient / Native"]],
     f_done_h:"Application received!", f_done_p:"Thanks for applying. We'll message you on WhatsApp with next steps.",
-    err_ko:"Please answer the required questions.", err_english:"Please select your English level.", err_phone:"Please check your phone number.", err_consent:"We need your consent.", err_cv:"Please attach your resume.",
+    err_ko:"Please answer the required questions.", err_email:"Please enter a valid email.", err_english:"Please select your English level.", err_phone:"Please check your phone number.", err_consent:"We need your consent.", err_cv:"Please attach your resume.",
     err_req:"Please complete the required fields.", sending:"Sending..."
   }
 };
@@ -398,6 +398,8 @@ form.addEventListener("submit", async e=>{
   e.preventDefault(); msg.className="msg";
   const num=waInput.value.replace(/[^\d]/g,"");
   if(!form.nombre.value.trim()||!num) return showErr(t().err_req);
+  const email=form.email.value.trim();
+  if(!email||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr(t().err_email);
   // Si utils ya cargó y el número es inválido, avisar (no bloquea si aún no cargó).
   if(num && typeof iti.isValidNumber==="function" && iti.isValidNumber()===false && iti.getNumber()){
     return showErr(t().err_phone);
