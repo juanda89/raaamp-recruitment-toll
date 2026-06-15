@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aplica · AI and Automation Specialist · raaamp</title>
+<meta name="description" content="Aplica al cargo de AI and Automation Specialist en raaamp." />
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --panel2:#0e1420; --line:#1f2937;
+    --txt:#e6edf6; --muted:#93a1b5; --brand:#6d5efc; --brand2:#38bdf8;
+    --ok:#22c55e; --err:#ef4444; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%,#182238,transparent),var(--bg);
+    color:var(--txt);line-height:1.55;min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:32px 20px 80px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.5px}
+  .dot{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+  .hero{margin:36px 0 8px}
+  h1{font-size:30px;margin:0 0 8px;line-height:1.2}
+  .lead{color:var(--muted);font-size:16px;margin:0 0 8px}
+  .pill{display:inline-block;font-size:12px;color:var(--brand2);border:1px solid var(--line);
+    border-radius:999px;padding:4px 10px;margin-top:8px}
+  form{margin-top:28px;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:24px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+  .req:after{content:" *";color:var(--brand2)}
+  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);
+    color:var(--txt);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand)}
+  .field{margin-bottom:16px}
+  .file{border:1px dashed var(--line);border-radius:10px;padding:16px;text-align:center;cursor:pointer}
+  .file:hover{border-color:var(--brand)}
+  .ko{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+  .ko-q{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px}
+  .seg{display:flex;gap:6px}
+  .seg button{flex:0 0 auto;background:transparent;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px}
+  .seg button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted)}
+  .consent input{width:auto;margin-top:3px}
+  .submit{margin-top:8px;width:100%;background:linear-gradient(135deg,var(--brand),var(--brand2));
+    border:none;color:#fff;font-weight:600;font-size:15px;padding:14px;border-radius:10px;cursor:pointer}
+  .submit:disabled{opacity:.55;cursor:not-allowed}
+  .note{font-size:12px;color:var(--muted);margin-top:14px}
+  .msg{margin-top:16px;padding:14px;border-radius:10px;display:none}
+  .msg.ok{display:block;background:rgba(34,197,94,.1);border:1px solid var(--ok);color:#bbf7d0}
+  .msg.err{display:block;background:rgba(239,68,68,.1);border:1px solid var(--err);color:#fecaca}
+  .done{text-align:center;padding:40px 0}
+  .done h2{font-size:24px}.check{font-size:48px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="dot"></span> raaamp</div>
+
+  <div class="hero" id="hero">
+    <span class="pill">Vacante abierta</span>
+    <h1>AI and Automation Specialist</h1>
+    <p class="lead">Construimos automatizaciones e integraciones con IA. Buscamos a alguien con
+      experiencia en n8n / Make / Python e integración de APIs y modelos de lenguaje.
+      Aplica abajo: el proceso es ágil y te acompañamos por WhatsApp.</p>
+  </div>
+
+  <form id="form" novalidate>
+    <div class="grid">
+      <div class="field"><label class="req">Nombre completo</label>
+        <input name="nombre" required autocomplete="name" /></div>
+      <div class="field"><label>Correo electrónico</label>
+        <input name="email" type="email" autocomplete="email" /></div>
+    </div>
+
+    <div class="field"><label class="req">WhatsApp (con indicativo, ej. +57 300 123 4567)</label>
+      <input name="whatsapp" required inputmode="tel" placeholder="+57..." /></div>
+
+    <div class="field"><label class="req">Hoja de vida (PDF, máx. 10 MB)</label>
+      <label class="file" for="cv" id="cvLabel">Haz clic para adjuntar tu CV en PDF</label>
+      <input id="cv" name="cv" type="file" accept=".pdf,.doc,.docx" hidden required /></div>
+
+    <div class="field">
+      <label>Requisitos mínimos</label>
+      <div id="knockout"></div>
+    </div>
+
+    <div class="field consent">
+      <input id="optin" type="checkbox" required />
+      <label for="optin" style="margin:0;color:var(--muted)">Autorizo que <b>raaamp</b> me contacte por
+        <b>WhatsApp</b> durante el proceso de selección y el tratamiento de mis datos personales conforme a la
+        política de privacidad (Ley 1581 de 2012 — habeas data).</label>
+    </div>
+
+    <button class="submit" id="submit" type="submit">Enviar aplicación</button>
+    <p class="note">Tus datos se usan únicamente para este proceso de selección. Toda la comunicación será por WhatsApp.</p>
+    <div class="msg" id="msg"></div>
+  </form>
+
+  <div class="done" id="done" style="display:none">
+    <div class="check">✅</div>
+    <h2>¡Aplicación recibida!</h2>
+    <p class="lead">Gracias por aplicar. Revisaremos tu perfil y te escribiremos por WhatsApp con los siguientes pasos.</p>
+  </div>
+</div>
+
+<script src="./config.js"></script>
+<script>
+  const C = window.REC_CONFIG;
+
+  // Requisitos mínimos (knockout). Editable según el perfil (PRD Apéndice A).
+  const KNOCKOUT = [
+    { key: "experiencia", q: "¿Tienes experiencia con automatización (n8n, Make, Zapier) o Python?" },
+    { key: "tiempo_completo", q: "¿Puedes trabajar tiempo completo?" },
+    { key: "ingles", q: "¿Tu nivel de inglés es al menos intermedio?" },
+  ];
+  const answers = {};
+  const koEl = document.getElementById("knockout");
+  KNOCKOUT.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "ko";
+    row.innerHTML = `<div class="ko-q"><span>${item.q}</span>
+      <div class="seg" data-key="${item.key}">
+        <button type="button" data-v="si">Sí</button>
+        <button type="button" data-v="no">No</button>
+      </div></div>`;
+    koEl.appendChild(row);
+  });
+  koEl.addEventListener("click", e => {
+    const b = e.target.closest("button[data-v]"); if(!b) return;
+    const seg = b.parentElement; const key = seg.dataset.key;
+    seg.querySelectorAll("button").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); answers[key] = b.dataset.v;
+  });
+
+  // UTM / fuente
+  const params = new URLSearchParams(location.search);
+  const fuente = params.get("utm_source") || params.get("fuente") || "directo";
+  const utm = {}; for (const [k,v] of params) if (k.startsWith("utm_")) utm[k]=v;
+
+  const cv = document.getElementById("cv");
+  const cvLabel = document.getElementById("cvLabel");
+  cv.addEventListener("change", () => {
+    cvLabel.textContent = cv.files[0] ? "📎 " + cv.files[0].name : "Haz clic para adjuntar tu CV en PDF";
+  });
+
+  const form = document.getElementById("form");
+  const msg = document.getElementById("msg");
+  const btn = document.getElementById("submit");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.className = "msg";
+    if (Object.keys(answers).length < KNOCKOUT.length) {
+      return showErr("Responde todas las preguntas de requisitos mínimos.");
+    }
+    if (!document.getElementById("optin").checked) {
+      return showErr("Necesitamos tu consentimiento para continuar.");
+    }
+    if (!cv.files[0]) return showErr("Adjunta tu hoja de vida.");
+
+    btn.disabled = true; btn.textContent = "Enviando...";
+    try {
+      const fd = new FormData();
+      fd.append("nombre", form.nombre.value.trim());
+      fd.append("email", form.email.value.trim());
+      fd.append("whatsapp", form.whatsapp.value.trim());
+      fd.append("whatsapp_optin", "true");
+      fd.append("fuente", fuente);
+      fd.append("utm", JSON.stringify(utm));
+      fd.append("knockout", JSON.stringify(answers));
+      fd.append("cv", cv.files[0]);
+
+      const res = await fetch(`${C.FUNCTIONS_URL}/ingest-lead`, {
+        method: "POST",
+        headers: { apikey: C.ANON_KEY, Authorization: `Bearer ${C.ANON_KEY}` },
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al enviar");
+      document.getElementById("form").style.display = "none";
+      document.getElementById("hero").style.display = "none";
+      document.getElementById("done").style.display = "block";
+    } catch (err) {
+      showErr(err.message || "No pudimos enviar tu aplicación. Intenta de nuevo.");
+      btn.disabled = false; btn.textContent = "Enviar aplicación";
+    }
+  });
+
+  function showErr(t){ msg.className="msg err"; msg.textContent=t; }
+</script>
+</body>
+</html>

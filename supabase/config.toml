@@ -1,0 +1,37 @@
+# Configuración de Supabase CLI para el sistema de reclutamiento.
+# `project_id` debe coincidir con el ref del proyecto al hac`supabase link`.
+project_id = "reclutamiento-raaamp"
+
+# ---------------------------------------------------------------------
+# Edge Functions
+#   verify_jwt = false  -> función PÚBLICA (candidate-facing / webhook).
+#                          Hace su propia validación (token, firma, etc.).
+#   verify_jwt = true   -> requiere sesión Supabase (acciones del responsable).
+# ---------------------------------------------------------------------
+
+[functions.ingest-lead]
+verify_jwt = false        # formulario público en raaamp.co
+
+[functions.whatsapp-webhook]
+verify_jwt = false        # webhook de Meta (verifica su propio token)
+
+[functions.submit-prueba]
+verify_jwt = false        # candidato con token de acceso
+
+[functions.submit-test]
+verify_jwt = false        # candidato con token de acceso
+
+[functions.cv-screening]
+verify_jwt = true         # interno (se invoca con service_role)
+
+[functions.evaluate-prueba]
+verify_jwt = true         # interno
+
+[functions.qualify]
+verify_jwt = true         # interno (lo invoca el webhook con service_role)
+
+[functions.advance-stage]
+verify_jwt = false        # valida el JWT del responsable manualmente
+
+[functions.reminders-cron]
+verify_jwt = true         # invocada por pg_cron con service_role

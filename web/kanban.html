@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pipeline de reclutamiento · raaamp</title>
+<style>
+  :root{--bg:#0b0f17;--panel:#121826;--panel2:#0e1420;--line:#1f2937;--txt:#e6edf6;
+    --muted:#93a1b5;--brand:#6d5efc;--brand2:#38bdf8;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);
+    color:var(--txt);line-height:1.5;font-size:14px}
+  header{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line);
+    position:sticky;top:0;background:var(--bg);z-index:20}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:700}
+  .dot{width:11px;height:11px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+  .spacer{flex:1}
+  .btn{background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:9px;
+    padding:8px 13px;cursor:pointer;font-size:13px}
+  .btn:hover{border-color:var(--brand)}
+  .btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;font-weight:600}
+  .btn.danger{border-color:var(--err);color:#fecaca}
+  /* Board */
+  .board{display:flex;gap:14px;padding:18px;overflow-x:auto;min-height:calc(100vh - 60px);align-items:flex-start}
+  .col{flex:0 0 270px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px}
+  .col h3{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:4px 6px 10px;
+    display:flex;justify-content:space-between}
+  .col h3 .c{background:var(--panel);border-radius:99px;padding:1px 8px;color:var(--txt)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:9px;cursor:pointer}
+  .card:hover{border-color:var(--brand)}
+  .card .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .card .nm{font-weight:600;font-size:14px}
+  .badge{font-weight:700;font-size:13px;border-radius:8px;padding:2px 9px;min-width:34px;text-align:center}
+  .b-hi{background:rgba(34,197,94,.16);color:#86efac}
+  .b-mid{background:rgba(56,189,248,.16);color:#7dd3fc}
+  .b-low{background:rgba(245,158,11,.16);color:#fcd34d}
+  .b-bad{background:rgba(239,68,68,.16);color:#fca5a5}
+  .b-na{background:var(--panel2);color:var(--muted)}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px;font-size:11px;color:var(--muted)}
+  .tag{border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  .flag{color:var(--warn)}
+  /* Drawer */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:30}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:480px;max-width:94vw;background:var(--panel);
+    border-left:1px solid var(--line);z-index:31;transform:translateX(100%);transition:transform .2s;
+    overflow-y:auto;padding:20px}
+  .drawer.open{transform:none}
+  .drawer h2{margin:0 0 4px;font-size:20px}
+  .sec{border-top:1px solid var(--line);padding:14px 0}
+  .sec h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  .kv{display:flex;justify-content:space-between;gap:10px;padding:4px 0;font-size:13px}
+  .kv span:first-child{color:var(--muted)}
+  .scores{display:flex;gap:8px}
+  .score-box{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px;text-align:center}
+  .score-box .v{font-size:20px;font-weight:700}.score-box .l{font-size:10px;color:var(--muted)}
+  .enn{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:6px}
+  .enn div{text-align:center;font-size:10px;color:var(--muted)}
+  .enn .b{height:42px;display:flex;align-items:flex-end;justify-content:center;background:var(--panel2);
+    border-radius:4px;overflow:hidden;position:relative}
+  .enn .b i{position:absolute;bottom:0;width:100%;background:linear-gradient(0deg,var(--brand),var(--brand2))}
+  .enn .b.tgt i{background:linear-gradient(0deg,var(--ok),#86efac)}
+  .chat{max-height:200px;overflow-y:auto;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px}
+  .bub{margin:4px 0;padding:7px 10px;border-radius:9px;font-size:12px;max-width:85%}
+  .bub.out{background:rgba(109,94,252,.18);margin-left:auto}
+  .bub.in{background:var(--panel)}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .links a{color:var(--brand2);font-size:13px;display:inline-block;margin-right:14px}
+  /* Settings + login modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:40;align-items:flex-start;justify-content:center;overflow-y:auto}
+  .modal .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin:48px 16px;width:560px;max-width:94vw}
+  .modal h2{margin:0 0 16px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
+  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:9px;padding:9px 11px;font-size:13px;font-family:inherit}
+  textarea{min-height:64px}
+  .tpl{border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px}
+  .tpl .code{font-weight:700;color:var(--brand2);font-size:12px}
+  .login{max-width:380px;margin:14vh auto 0;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:28px}
+  .msg{margin-top:12px;padding:10px;border-radius:9px;font-size:13px;display:none}
+  .msg.err{display:block;background:rgba(239,68,68,.1);border:1px solid var(--err);color:#fecaca}
+  .hide{display:none}
+  .tabs{display:flex;gap:6px;margin-bottom:14px}
+  .tabs button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 12px;cursor:pointer}
+  .tabs button.on{color:#fff;border-color:var(--brand)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginView" class="hide">
+  <div class="login">
+    <div class="brand" style="margin-bottom:18px"><span class="dot"></span> raaamp · Reclutamiento</div>
+    <label>Correo</label><input id="liEmail" type="email" autocomplete="username" />
+    <label>Contraseña</label><input id="liPass" type="password" autocomplete="current-password" />
+    <button class="btn primary" id="liBtn" style="width:100%;margin-top:16px">Entrar</button>
+    <div class="msg" id="liMsg"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appView" class="hide">
+  <header>
+    <div class="brand"><span class="dot"></span> raaamp · Pipeline</div>
+    <div class="spacer"></div>
+    <button class="btn" id="refreshBtn">↻ Actualizar</button>
+    <button class="btn" id="settingsBtn">⚙ Configuración</button>
+    <button class="btn" id="logoutBtn">Salir</button>
+  </header>
+  <div class="board" id="board"></div>
+</div>
+
+<!-- DRAWER ficha -->
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer"></div>
+
+<!-- SETTINGS -->
+<div class="modal" id="settingsModal">
+  <div class="box">
+    <h2>Configuración</h2>
+    <div class="tabs">
+      <button class="on" data-tab="umbrales">Umbrales y pesos</button>
+      <button data-tab="mensajes">Mensajes</button>
+    </div>
+    <div id="tab-umbrales"></div>
+    <div id="tab-mensajes" class="hide"></div>
+    <div class="actions" style="margin-top:16px">
+      <button class="btn primary" id="saveSettings">Guardar</button>
+      <button class="btn" id="closeSettings">Cerrar</button>
+    </div>
+    <div class="msg" id="setMsg"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<script>
+const C = window.REC_CONFIG;
+const sb = window.supabase.createClient(C.SUPABASE_URL, C.ANON_KEY);
+
+const COLUMNS = [
+  ["APLICADO","Nuevos"],["SCREENING_CV","Screening CV"],["CUALIFICACION_WA","Cualificación WA"],
+  ["PRUEBA_TECNICA","Prueba técnica"],["TEST_PERSONALIDAD","Test personalidad"],
+  ["FINALISTA","Finalistas"],["ENTREVISTA_FINAL","Entrevista"],["CONTRATADO","Contratado"],
+  ["RECHAZADO","Rechazados / Archivo"]
+];
+const TIPOS_NOMBRE = {1:"Reformador",2:"Ayudador",3:"Triunfador",4:"Individualista",5:"Investigador",6:"Leal",7:"Entusiasta",8:"Desafiador",9:"Pacificador"};
+let settings = null, candidates = [];
+
+// ---------------- Auth ----------------
+async function boot(){
+  const { data } = await sb.auth.getSession();
+  if(data.session){ showApp(); } else { showLogin(); }
+  sb.auth.onAuthStateChange((_e,s)=>{ s ? showApp() : showLogin(); });
+}
+function showLogin(){ qs("#loginView").classList.remove("hide"); qs("#appView").classList.add("hide"); }
+async function showApp(){ qs("#loginView").classList.add("hide"); qs("#appView").classList.remove("hide"); await loadAll(); }
+
+qs("#liBtn").onclick = async ()=>{
+  const m=qs("#liMsg"); m.className="msg";
+  const { error } = await sb.auth.signInWithPassword({ email:qs("#liEmail").value.trim(), password:qs("#liPass").value });
+  if(error){ m.className="msg err"; m.textContent=error.message; }
+};
+qs("#logoutBtn").onclick = ()=> sb.auth.signOut();
+
+// ---------------- Data ----------------
+async function loadAll(){
+  const [s,c] = await Promise.all([
+    sb.from("rec_settings").select("*").eq("id",true).single(),
+    sb.from("rec_candidates").select("*").order("score_total",{ascending:false,nullsFirst:false}).order("fecha_aplicacion")
+  ]);
+  if(s.error){ alert("Sin acceso. ¿El usuario tiene permisos? "+s.error.message); return; }
+  settings = s.data; candidates = c.data||[];
+  renderBoard();
+}
+qs("#refreshBtn").onclick = loadAll;
+
+function renderBoard(){
+  const board = qs("#board"); board.innerHTML="";
+  for(const [estado,titulo] of COLUMNS){
+    const items = candidates.filter(x => estado==="RECHAZADO" ? (x.estado==="RECHAZADO"||x.estado==="RETIRADO") : x.estado===estado);
+    const col = document.createElement("div"); col.className="col";
+    col.innerHTML = `<h3>${titulo} <span class="c">${items.length}</span></h3>`;
+    items.forEach(x => col.appendChild(cardEl(x)));
+    board.appendChild(col);
+  }
+}
+
+function cardEl(x){
+  const d = document.createElement("div"); d.className="card"; d.onclick=()=>openDrawer(x.id);
+  const dias = daysIn(x.estado_changed_at);
+  d.innerHTML = `<div class="top"><span class="nm">${esc(x.nombre)}</span>${badge(x.score_total)}</div>
+    <div class="meta">
+      ${x.fuente?`<span class="tag">${esc(x.fuente)}</span>`:""}
+      <span class="tag">${dias}d en etapa</span>
+      ${x.flag_revision?`<span class="tag flag">⚑ revisión</span>`:""}
+    </div>`;
+  return d;
+}
+function badge(v){
+  if(v==null) return `<span class="badge b-na">—</span>`;
+  const cls = v>=80?"b-hi":v>=65?"b-mid":v>=50?"b-low":"b-bad";
+  return `<span class="badge ${cls}">${Math.round(v)}</span>`;
+}
+
+// ---------------- Drawer ficha ----------------
+async function openDrawer(id){
+  const x = candidates.find(c=>c.id===id); if(!x) return;
+  const drawer = qs("#drawer");
+  qs("#overlay").style.display="block"; drawer.classList.add("open");
+  drawer.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:start">
+      <div><h2>${esc(x.nombre)}</h2><div style="color:var(--muted);font-size:13px">${esc(x.email||"")} · ${esc(x.whatsapp)}</div></div>
+      <button class="btn" onclick="closeDrawer()">✕</button></div>
+    ${x.flag_revision?`<div class="sec" style="color:var(--warn)">⚑ Requiere revisión: ${esc(x.motivo_revision||"")}</div>`:""}
+    <div class="sec"><h4>Puntajes</h4>
+      <div class="scores">
+        <div class="score-box"><div class="v">${fmt(x.score_total)}</div><div class="l">TOTAL</div></div>
+        <div class="score-box"><div class="v">${fmt(x.score_cv)}</div><div class="l">CV ${pct(settings.peso_cv)}</div></div>
+        <div class="score-box"><div class="v">${fmt(x.score_prueba)}</div><div class="l">Prueba ${pct(settings.peso_prueba)}</div></div>
+        <div class="score-box"><div class="v">${fmt(x.score_personalidad)}</div><div class="l">Person. ${pct(settings.peso_personalidad)}</div></div>
+      </div>
+      ${x.cv_resumen?`<div style="margin-top:10px;font-size:12px;color:var(--muted)">${esc(x.cv_resumen)}</div>`:""}
+    </div>
+    ${ennHtml(x.enn_ranking)}
+    <div class="sec"><h4>Cualificación</h4>
+      ${kv("Expectativa salarial", x.expectativa_salarial!=null?money(x.expectativa_salarial):"—")}
+      ${kv("Inglés", x.nivel_ingles||"—")}
+      ${kv("Modalidad", x.modalidad||"—")}
+      ${kv("Disponibilidad", x.disponibilidad_inicio||"—")}
+      ${kv("Ubicación", x.ubicacion||"—")}
+    </div>
+    <div class="sec"><h4>Accesos</h4><div class="links" id="links">
+      <a href="#" id="cvLink">Ver CV</a>
+      ${x.prueba_entrega_url?`<a href="#" id="pruebaLink">Ver entrega</a>`:""}
+    </div></div>
+    <div class="sec"><h4>Conversación WhatsApp</h4><div class="chat" id="chat">Cargando…</div></div>
+    <div class="sec"><h4>Acciones</h4><div class="actions" id="acts">${actionsHtml(x)}</div>
+      <div class="msg" id="actMsg"></div></div>
+    <div class="sec"><h4>Estado: ${x.estado}${x.motivo_rechazo?` · ${esc(x.motivo_rechazo)}`:""}</h4></div>`;
+
+  // CV signed link
+  qs("#cvLink")?.addEventListener("click", async e=>{ e.preventDefault(); await openSigned("rec-cvs", x.cv_url); });
+  qs("#pruebaLink")?.addEventListener("click", async e=>{ e.preventDefault(); await openSigned("rec-submissions", x.prueba_entrega_url); });
+  bindActions(x);
+  loadChat(id);
+}
+window.closeDrawer = ()=>{ qs("#overlay").style.display="none"; qs("#drawer").classList.remove("open"); };
+qs("#overlay").onclick = window.closeDrawer;
+
+async function openSigned(bucket, path){
+  if(!path) return;
+  if(/^https?:\/\//.test(path)){ window.open(path,"_blank"); return; }
+  const { data, error } = await sb.storage.from(bucket).createSignedUrl(path, 600);
+  if(data?.signedUrl) window.open(data.signedUrl,"_blank"); else alert(error?.message||"No disponible");
+}
+async function loadChat(id){
+  const { data } = await sb.from("rec_messages").select("*").eq("candidate_id",id).order("created_at");
+  const el = qs("#chat");
+  if(!data?.length){ el.textContent="Sin mensajes aún."; return; }
+  el.innerHTML = data.map(m=>`<div class="bub ${m.direccion==="saliente"?"out":"in"}">${esc(m.cuerpo)}</div>`).join("");
+}
+function ennHtml(r){
+  if(!r) return "";
+  const tgt = Object.keys(settings.tipos_objetivo||{});
+  const bars = Object.keys(TIPOS_NOMBRE).map(t=>{
+    const v = r[t]||0; const on = tgt.includes(t)?"tgt":"";
+    return `<div><div class="b ${on}"><i style="height:${v}%"></i></div>${t}</div>`;
+  }).join("");
+  return `<div class="sec"><h4>Afinidad Eneagrama (objetivo en verde)</h4><div class="enn">${bars}</div></div>`;
+}
+
+// ---------------- Actions ----------------
+function actionsHtml(x){
+  const a=[];
+  if(x.flag_revision) a.push(btn("aprobar_revision","Aprobar y enviar prueba","primary"));
+  if(x.estado==="FINALISTA") a.push(btn("agendar_entrevista","Agendar entrevista","primary"));
+  if(x.estado==="ENTREVISTA_FINAL"){ a.push(btn("decision_contratado","Contratar","primary")); a.push(btn("decision_rechazado","Rechazar","danger")); }
+  if(x.estado==="CONTRATADO") a.push(btn("aceptar_oferta","Enviar bienvenida","primary"));
+  if(["PRUEBA_TECNICA","TEST_PERSONALIDAD"].includes(x.estado)) a.push(btn("reenviar_prueba","Reenviar prueba",""));
+  if(!["CONTRATADO","RECHAZADO","RETIRADO"].includes(x.estado)) a.push(btn("rechazar","Rechazar","danger"));
+  return a.join("");
+}
+function btn(act,label,cls){ return `<button class="btn ${cls}" data-act="${act}">${label}</button>`; }
+
+function bindActions(x){
+  qs("#acts").querySelectorAll("button[data-act]").forEach(b=>{
+    b.onclick = ()=> doAction(x, b.dataset.act);
+  });
+}
+async function doAction(x, act){
+  const m=qs("#actMsg"); m.className="msg";
+  let payload={ candidate_id:x.id };
+  if(act==="agendar_entrevista"){
+    const inicio = prompt("Fecha y hora de la entrevista (YYYY-MM-DD HH:MM):");
+    if(!inicio) return;
+    const enlace = prompt("Enlace de videollamada:")||"";
+    payload = {...payload, action:"agendar_entrevista", inicio:new Date(inicio.replace(" ","T")).toISOString(), enlace_videollamada:enlace};
+  } else if(act==="decision_contratado"){ payload={...payload, action:"decision", decision:"contratado"}; }
+  else if(act==="decision_rechazado"){ if(!confirm("¿Rechazar tras la entrevista?")) return; payload={...payload, action:"decision", decision:"rechazado"}; }
+  else if(act==="rechazar"){ const motivo=prompt("Motivo interno del rechazo:")||"Rechazo manual"; payload={...payload, action:"rechazar", motivo}; }
+  else { payload={...payload, action:act}; }
+
+  const { data:{ session } } = await sb.auth.getSession();
+  try{
+    const res = await fetch(`${C.FUNCTIONS_URL}/advance-stage`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:C.ANON_KEY, Authorization:`Bearer ${session.access_token}` },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error||"Error");
+    window.closeDrawer(); await loadAll();
+  }catch(e){ m.className="msg err"; m.textContent=e.message; }
+}
+
+// ---------------- Settings ----------------
+qs("#settingsBtn").onclick = ()=>{ renderSettings(); qs("#settingsModal").style.display="flex"; };
+qs("#closeSettings").onclick = ()=> qs("#settingsModal").style.display="none";
+qsa(".tabs button").forEach(b=> b.onclick=()=>{
+  qsa(".tabs button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+  qs("#tab-umbrales").classList.toggle("hide", b.dataset.tab!=="umbrales");
+  qs("#tab-mensajes").classList.toggle("hide", b.dataset.tab!=="mensajes");
+});
+
+function renderSettings(){
+  const s=settings;
+  qs("#tab-umbrales").innerHTML = `
+    <div class="row">
+      <div><label>Peso CV</label><input id="s_peso_cv" type="number" step="0.05" value="${s.peso_cv}"></div>
+      <div><label>Peso prueba</label><input id="s_peso_prueba" type="number" step="0.05" value="${s.peso_prueba}"></div>
+      <div><label>Peso personalidad</label><input id="s_peso_personalidad" type="number" step="0.05" value="${s.peso_personalidad}"></div>
+      <div><label>Umbral CV</label><input id="s_umbral_cv" type="number" value="${s.umbral_cv}"></div>
+      <div><label>Umbral prueba</label><input id="s_umbral_prueba" type="number" value="${s.umbral_prueba}"></div>
+      <div><label>Umbral total</label><input id="s_umbral_total" type="number" value="${s.umbral_total}"></div>
+      <div><label>Salario mín.</label><input id="s_salario_min" type="number" value="${s.salario_min??""}"></div>
+      <div><label>Salario máx.</label><input id="s_salario_max" type="number" value="${s.salario_max??""}"></div>
+      <div><label>Inglés mínimo</label><select id="s_nivel_ingles_min">
+        ${["basico","intermedio","avanzado"].map(v=>`<option ${s.nivel_ingles_min===v?"selected":""}>${v}</option>`).join("")}
+      </select></div>
+      <div><label>Plazo prueba (h)</label><input id="s_plazo_prueba_horas" type="number" value="${s.plazo_prueba_horas}"></div>
+      <div><label>Plazo test (h)</label><input id="s_plazo_test_horas" type="number" value="${s.plazo_test_horas}"></div>
+      <div><label>Tipos objetivo (JSON)</label><input id="s_tipos_objetivo" value='${JSON.stringify(s.tipos_objetivo)}'></div>
+    </div>
+    <label>Enlace de agenda (entrevista)</label><input id="s_enlace_agenda" value="${s.enlace_agenda||""}">
+    <label>Enunciado / rúbrica de la prueba (URL)</label><input id="s_enunciado_prueba_url" value="${s.enunciado_prueba_url||""}">`;
+
+  sb.from("rec_message_templates").select("*").order("codigo").then(({data})=>{
+    qs("#tab-mensajes").innerHTML = (data||[]).map(t=>`
+      <div class="tpl"><div class="code">${t.codigo} · ${esc(t.proposito)} (${t.canal})</div>
+      ${t.asunto!=null?`<input data-asunto="${t.codigo}" value="${esc(t.asunto||"")}" placeholder="Asunto">`:""}
+      <textarea data-cuerpo="${t.codigo}">${esc(t.cuerpo)}</textarea></div>`).join("");
+  });
+}
+
+qs("#saveSettings").onclick = async ()=>{
+  const m=qs("#setMsg"); m.className="msg";
+  const num=id=>{const v=qs("#"+id).value; return v===""?null:Number(v);};
+  let tipos; try{ tipos=JSON.parse(qs("#s_tipos_objetivo").value);}catch{ m.className="msg err"; m.textContent="Tipos objetivo: JSON inválido"; return; }
+  const patch={
+    peso_cv:num("s_peso_cv"), peso_prueba:num("s_peso_prueba"), peso_personalidad:num("s_peso_personalidad"),
+    umbral_cv:num("s_umbral_cv"), umbral_prueba:num("s_umbral_prueba"), umbral_total:num("s_umbral_total"),
+    salario_min:num("s_salario_min"), salario_max:num("s_salario_max"),
+    nivel_ingles_min:qs("#s_nivel_ingles_min").value, plazo_prueba_horas:num("s_plazo_prueba_horas"),
+    plazo_test_horas:num("s_plazo_test_horas"), tipos_objetivo:tipos,
+    enlace_agenda:qs("#s_enlace_agenda").value||null, enunciado_prueba_url:qs("#s_enunciado_prueba_url").value||null
+  };
+  const { error } = await sb.from("rec_settings").update(patch).eq("id",true);
+  if(error){ m.className="msg err"; m.textContent=error.message; return; }
+
+  // Guardar plantillas editadas
+  const tpls={};
+  qsa("[data-cuerpo]").forEach(t=> tpls[t.dataset.cuerpo]={cuerpo:t.value});
+  qsa("[data-asunto]").forEach(t=> (tpls[t.dataset.asunto]=tpls[t.dataset.asunto]||{}).asunto=t.value);
+  for(const [codigo,vals] of Object.entries(tpls)){
+    await sb.from("rec_message_templates").update(vals).eq("codigo",codigo);
+  }
+  m.className="msg"; m.style.display="block"; m.style.color="#86efac"; m.textContent="Guardado ✓";
+  await loadAll();
+};
+
+// ---------------- utils ----------------
+function qs(s){return document.querySelector(s);} function qsa(s){return [...document.querySelectorAll(s)];}
+function esc(s){const d=document.createElement("div"); d.textContent=s==null?"":s; return d.innerHTML;}
+function fmt(v){return v==null?"—":Math.round(v);}
+function pct(v){return Math.round(v*100)+"%";}
+function kv(k,v){return `<div class="kv"><span>${k}</span><span>${esc(String(v))}</span></div>`;}
+function money(n){return new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(n);}
+function daysIn(iso){ if(!iso) return 0; return Math.floor((Date.now()-new Date(iso))/86400000); }
+
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Test · raaamp</title>
+<style>
+  :root{--bg:#0b0f17;--panel:#121826;--panel2:#0e1420;--line:#1f2937;--txt:#e6edf6;
+    --muted:#93a1b5;--brand:#6d5efc;--brand2:#38bdf8;--ok:#22c55e;--err:#ef4444}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);
+    color:var(--txt);line-height:1.55}
+  .wrap{max-width:680px;margin:0 auto;padding:28px 18px 80px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .dot{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+  h1{font-size:24px;margin:24px 0 4px}
+  .lead{color:var(--muted);margin:0 0 18px}
+  .progress{position:sticky;top:0;background:var(--bg);padding:12px 0;z-index:5}
+  .bar{height:8px;background:var(--panel);border-radius:99px;overflow:hidden}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand2));transition:width .25s}
+  .count{font-size:12px;color:var(--muted);margin-top:6px}
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  .q .n{font-size:12px;color:var(--brand2);margin-bottom:10px}
+  .opt{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;
+    padding:13px 14px;margin-bottom:10px;cursor:pointer;background:var(--panel2)}
+  .opt:hover{border-color:var(--brand)}
+  .opt.on{border-color:var(--brand);background:rgba(109,94,252,.14)}
+  .opt .rb{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:0 0 auto;margin-top:2px}
+  .opt.on .rb{border-color:var(--brand);background:var(--brand)}
+  .submit{width:100%;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;
+    font-weight:600;font-size:15px;padding:14px;border-radius:10px;cursor:pointer;margin-top:8px}
+  .submit:disabled{opacity:.5;cursor:not-allowed}
+  .state{text-align:center;padding:60px 20px;color:var(--muted)}
+  .msg{margin-top:14px;padding:12px;border-radius:10px;display:none}
+  .msg.err{display:block;background:rgba(239,68,68,.1);border:1px solid var(--err);color:#fecaca}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="dot"></span> raaamp</div>
+  <div id="loading" class="state">Cargando tu test…</div>
+  <div id="invalid" class="state" style="display:none">Este enlace no es válido o ya expiró.</div>
+  <div id="done" class="state" style="display:none">
+    <div style="font-size:46px">✅</div>
+    <h1>¡Test completado!</h1>
+    <p class="lead">Registramos tus respuestas. Te escribiremos por WhatsApp con el siguiente paso.</p>
+  </div>
+
+  <div id="app" style="display:none">
+    <h1>Test de afinidad</h1>
+    <p class="lead">No hay respuestas correctas: elige la opción con la que más te identificas. Toma 10–15 minutos.</p>
+    <div class="progress"><div class="bar"><i id="fill"></i></div><div class="count" id="count"></div></div>
+    <div id="questions"></div>
+    <button class="submit" id="submit" disabled>Enviar test</button>
+    <div class="msg" id="msg"></div>
+  </div>
+</div>
+
+<script src="./config.js"></script>
+<script>
+  const C = window.REC_CONFIG;
+  const token = new URLSearchParams(location.search).get("token");
+  const choices = {}; // question_id -> "A"|"B"
+  let total = 0;
+
+  async function load(){
+    if(!token){ return invalid(); }
+    try{
+      const res = await fetch(`${C.FUNCTIONS_URL}/submit-test?token=${encodeURIComponent(token)}`,
+        { headers:{ apikey:C.ANON_KEY, Authorization:`Bearer ${C.ANON_KEY}` }});
+      const data = await res.json();
+      if(!res.ok || !data.preguntas?.length) return invalid();
+      render(data.preguntas);
+    }catch(e){ invalid(); }
+  }
+
+  function render(preguntas){
+    total = preguntas.length;
+    const cont = document.getElementById("questions");
+    preguntas.forEach((p,i)=>{
+      const div = document.createElement("div");
+      div.className="q";
+      div.innerHTML = `<div class="n">Pregunta ${i+1} de ${total}</div>
+        <div class="opt" data-q="${p.id}" data-v="A"><span class="rb"></span><span>${esc(p.opcion_a)}</span></div>
+        <div class="opt" data-q="${p.id}" data-v="B"><span class="rb"></span><span>${esc(p.opcion_b)}</span></div>`;
+      cont.appendChild(div);
+    });
+    cont.addEventListener("click", e=>{
+      const o = e.target.closest(".opt"); if(!o) return;
+      const q = o.dataset.q;
+      o.parentElement.querySelectorAll(".opt").forEach(x=>x.classList.remove("on"));
+      o.classList.add("on"); choices[q]=o.dataset.v; refresh();
+    });
+    document.getElementById("loading").style.display="none";
+    document.getElementById("app").style.display="block";
+    refresh();
+  }
+
+  function refresh(){
+    const n = Object.keys(choices).length;
+    document.getElementById("fill").style.width = (n/total*100)+"%";
+    document.getElementById("count").textContent = `${n} / ${total} respondidas`;
+    document.getElementById("submit").disabled = n < total;
+  }
+
+  document.getElementById("submit").addEventListener("click", async ()=>{
+    const btn = document.getElementById("submit");
+    btn.disabled=true; btn.textContent="Enviando…";
+    const respuestas = Object.entries(choices).map(([question_id,eleccion])=>({question_id:Number(question_id),eleccion}));
+    try{
+      const res = await fetch(`${C.FUNCTIONS_URL}/submit-test`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json", apikey:C.ANON_KEY, Authorization:`Bearer ${C.ANON_KEY}` },
+        body: JSON.stringify({ token, respuestas })
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error||"Error");
+      document.getElementById("app").style.display="none";
+      document.getElementById("done").style.display="block";
+    }catch(e){
+      const m=document.getElementById("msg"); m.className="msg err"; m.textContent=e.message;
+      btn.disabled=false; btn.textContent="Enviar test";
+    }
+  });
+
+  function invalid(){ document.getElementById("loading").style.display="none";
+    document.getElementById("invalid").style.display="block"; }
+  function esc(s){ const d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+  load();
+</script>
+</body>
+</html>

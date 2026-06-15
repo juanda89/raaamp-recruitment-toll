@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prueba técnica · raaamp</title>
+<style>
+  :root{--bg:#0b0f17;--panel:#121826;--panel2:#0e1420;--line:#1f2937;--txt:#e6edf6;
+    --muted:#93a1b5;--brand:#6d5efc;--brand2:#38bdf8;--ok:#22c55e;--err:#ef4444}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);
+    color:var(--txt);line-height:1.55}
+  .wrap{max-width:680px;margin:0 auto;padding:28px 18px 80px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .dot{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+  h1{font-size:24px;margin:24px 0 4px}
+  .lead{color:var(--muted);margin:0 0 18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+  .deadline{display:inline-block;font-size:13px;color:var(--brand2);border:1px solid var(--line);
+    border-radius:99px;padding:5px 12px;margin-bottom:10px}
+  label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
+  input,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;margin-bottom:14px}
+  .file{border:1px dashed var(--line);border-radius:10px;padding:16px;text-align:center;cursor:pointer;margin-bottom:14px}
+  .file:hover{border-color:var(--brand)}
+  .submit{width:100%;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:#fff;
+    font-weight:600;font-size:15px;padding:14px;border-radius:10px;cursor:pointer}
+  .submit:disabled{opacity:.5;cursor:not-allowed}
+  .state{text-align:center;padding:60px 20px;color:var(--muted)}
+  .msg{margin-top:14px;padding:12px;border-radius:10px;display:none}
+  .msg.err{display:block;background:rgba(239,68,68,.1);border:1px solid var(--err);color:#fecaca}
+  .or{text-align:center;color:var(--muted);font-size:12px;margin:6px 0 14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="dot"></span> raaamp</div>
+
+  <div id="done" class="state" style="display:none">
+    <div style="font-size:46px">✅</div>
+    <h1>¡Entrega recibida!</h1>
+    <p class="lead">Tenemos tu prueba técnica. La revisamos y te avisamos por WhatsApp con el resultado.</p>
+  </div>
+
+  <div id="app">
+    <h1>Prueba técnica</h1>
+    <p class="lead">Sube el resultado de tu prueba o comparte el enlace a tu repositorio/entrega.</p>
+
+    <div class="card">
+      <span class="deadline" id="deadline">Revisa el plazo en tu WhatsApp</span>
+      <p style="margin:0;color:var(--muted)">El enunciado y la rúbrica están en el documento que recibiste por WhatsApp.
+        Si tienes dudas sobre el enunciado, escríbenos por ese mismo canal.</p>
+    </div>
+
+    <div class="card">
+      <label>Enlace a tu entrega (repositorio, Drive, Loom, etc.)</label>
+      <input id="enlace" type="url" placeholder="https://github.com/tu-usuario/tu-prueba" />
+      <div class="or">— o —</div>
+      <label>Adjunta un archivo (zip, pdf… máx. 25 MB)</label>
+      <label class="file" for="archivo" id="fileLabel">Haz clic para adjuntar tu entrega</label>
+      <input id="archivo" type="file" hidden />
+      <button class="submit" id="submit">Enviar entrega</button>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+</div>
+
+<script src="./config.js"></script>
+<script>
+  const C = window.REC_CONFIG;
+  const token = new URLSearchParams(location.search).get("token");
+  const archivo = document.getElementById("archivo");
+  const fileLabel = document.getElementById("fileLabel");
+  archivo.addEventListener("change", ()=> fileLabel.textContent = archivo.files[0] ? "📎 "+archivo.files[0].name : "Haz clic para adjuntar tu entrega");
+
+  document.getElementById("submit").addEventListener("click", async ()=>{
+    const msg = document.getElementById("msg"); msg.className="msg";
+    const enlace = document.getElementById("enlace").value.trim();
+    if(!token) return err("Enlace inválido.");
+    if(!enlace && !archivo.files[0]) return err("Comparte un enlace o adjunta un archivo.");
+    const btn = document.getElementById("submit"); btn.disabled=true; btn.textContent="Enviando…";
+    try{
+      const fd = new FormData();
+      fd.append("token", token);
+      if(enlace) fd.append("enlace", enlace);
+      if(archivo.files[0]) fd.append("archivo", archivo.files[0]);
+      const res = await fetch(`${C.FUNCTIONS_URL}/submit-prueba`,{
+        method:"POST", headers:{ apikey:C.ANON_KEY, Authorization:`Bearer ${C.ANON_KEY}` }, body: fd
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error||"Error");
+      document.getElementById("app").style.display="none";
+      document.getElementById("done").style.display="block";
+    }catch(e){ err(e.message); btn.disabled=false; btn.textContent="Enviar entrega"; }
+    function err(t){ msg.className="msg err"; msg.textContent=t; }
+  });
+  function err(t){ const m=document.getElementById("msg"); m.className="msg err"; m.textContent=t; }
+</script>
+</body>
+</html>
