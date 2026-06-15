@@ -4,74 +4,74 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AI and Automation Specialist · raaamp</title>
-<meta name="description" content="Únete a raaamp como AI and Automation Specialist. 100% remoto." />
+<meta name="description" content="Únete a raaamp como AI and Automation Specialist. 100% remoto. Disponible en español e inglés." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0B0B0B; --bg2:#05070b; --panel:rgba(255,255,255,.04); --panel2:rgba(255,255,255,.02);
-    --line:rgba(255,255,255,.10); --txt:#F8FAFC; --muted:#94A3B8; --muted2:#64748B;
-    --lime:#c7ff8a; --cyan:#8affe6; --grad:linear-gradient(135deg,#c7ff8a 0%,#8affe6 100%);
-    --err:#ef4444; --ok:#c7ff8a;
+    --bg:#F8FAFC; --bg2:#FFFFFF; --panel:#FFFFFF; --panel2:#F5F7FA;
+    --line:#E6EBF1; --line2:#EDF1F6; --txt:#0B0B0B; --muted:#5B6675; --muted2:#8A94A3;
+    --lime:#98d653; --cyan:#0ea5b9; --grad:linear-gradient(135deg,#c7ff8a 0%,#8affe6 100%);
+    --grad2:linear-gradient(90deg,#98d653 0%,#0ea5b9 100%);
+    --err:#dc2626; --ink:#06251c;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{margin:0;font-family:Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     color:var(--txt);line-height:1.6;
     background:
-      radial-gradient(900px 500px at 85% -5%,rgba(138,255,230,.10),transparent),
-      radial-gradient(900px 500px at 0% 10%,rgba(199,255,138,.08),transparent),
+      radial-gradient(900px 480px at 88% -8%,rgba(138,255,230,.22),transparent),
+      radial-gradient(820px 460px at -5% 4%,rgba(199,255,138,.20),transparent),
       var(--bg);}
-  h1,h2,h3{font-family:Outfit,sans-serif;line-height:1.12;margin:0}
+  h1,h2,h3{font-family:Outfit,sans-serif;line-height:1.13;margin:0}
   a{color:inherit}
-  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
-  /* nav */
-  nav{display:flex;align-items:center;gap:14px;padding:22px 0;max-width:880px;margin:0 auto;padding-left:22px;padding-right:22px}
-  .brand{display:flex;align-items:center;gap:10px;font-family:Outfit;font-weight:800;font-size:19px;letter-spacing:-.3px}
-  .logo{width:14px;height:14px;border-radius:50%;background:var(--grad)}
+  .wrap{max-width:900px;margin:0 auto;padding:0 22px}
+  /* nav + language */
+  nav{display:flex;align-items:center;gap:14px;max-width:900px;margin:0 auto;padding:20px 22px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:Outfit;font-weight:800;font-size:20px;letter-spacing:-.3px}
+  .logo{width:14px;height:14px;border-radius:50%;background:var(--grad2)}
   .sp{flex:1}
-  .lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:13px}
-  .lang button{background:transparent;border:0;color:var(--muted);padding:6px 13px;cursor:pointer;font-family:Manrope;font-weight:600}
-  .lang button.on{background:var(--grad);color:#06251c}
+  .langwrap{display:flex;align-items:center;gap:10px}
+  .langhint{font-size:12.5px;color:var(--muted);font-weight:600;display:none}
+  @media(min-width:560px){.langhint{display:block}}
+  .lang{display:flex;align-items:center;background:var(--bg2);border:1.5px solid var(--line);
+    border-radius:999px;overflow:hidden;font-size:14px;box-shadow:0 2px 10px rgba(11,11,11,.05)}
+  .lang .globe{padding:0 4px 0 12px;font-size:14px}
+  .lang button{background:transparent;border:0;color:var(--muted);padding:9px 16px;cursor:pointer;
+    font-family:Outfit;font-weight:700}
+  .lang button.on{background:var(--grad);color:var(--ink)}
   /* hero */
-  .hero{padding:26px 0 10px}
-  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--lime);
-    border:1px solid var(--line);border-radius:999px;padding:5px 13px;margin-bottom:20px}
+  .hero{padding:30px 0 8px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#0a7f5e;
+    background:rgba(152,214,83,.14);border:1px solid rgba(152,214,83,.4);border-radius:999px;padding:6px 14px;margin-bottom:20px}
   .eyebrow .pdot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)}
-  h1.title{font-size:46px;font-weight:800;letter-spacing:-1.5px;margin-bottom:14px}
-  h1.title .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .sub{font-size:18px;color:var(--muted);max-width:640px;margin-bottom:22px}
+  h1.title{font-size:48px;font-weight:800;letter-spacing:-1.6px;margin-bottom:14px}
+  h1.title .g{background:var(--grad2);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{font-size:18.5px;color:var(--muted);max-width:660px;margin-bottom:22px}
   .chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:28px}
-  .chip{font-size:13px;font-weight:600;color:var(--txt);background:var(--panel);border:1px solid var(--line);
+  .chip{font-size:13px;font-weight:600;color:var(--txt);background:var(--bg2);border:1px solid var(--line);
     border-radius:999px;padding:7px 14px}
-  .cta{display:inline-flex;align-items:center;gap:9px;background:var(--grad);color:#06251c;font-family:Outfit;
-    font-weight:700;font-size:16px;border:0;border-radius:12px;padding:15px 28px;cursor:pointer;
-    box-shadow:0 10px 30px rgba(138,255,230,.18);transition:transform .15s,box-shadow .15s}
-  .cta:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(138,255,230,.28)}
-  .cta.sm{font-size:15px;padding:13px 24px}
+  .cta{display:inline-flex;align-items:center;gap:9px;background:var(--grad);color:var(--ink);font-family:Outfit;
+    font-weight:800;font-size:16px;border:0;border-radius:12px;padding:15px 30px;cursor:pointer;
+    box-shadow:0 10px 26px rgba(14,165,185,.22);transition:transform .15s,box-shadow .15s}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(14,165,185,.30)}
   /* sections */
   section.block{padding:26px 0;border-top:1px solid var(--line)}
-  .block h2{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:14px}
-  .block p{color:var(--muted);margin:0 0 12px}
+  .block h2{font-size:25px;font-weight:700;letter-spacing:-.5px;margin-bottom:14px}
+  .block p{color:var(--muted);margin:0 0 12px;font-size:15.5px}
   ul.feat{list-style:none;padding:0;margin:0;display:grid;gap:11px}
-  ul.feat li{display:flex;gap:11px;align-items:flex-start;color:var(--txt)}
-  ul.feat li:before{content:"";flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--grad);margin-top:9px}
-  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-  @media(max-width:620px){.steps{grid-template-columns:1fr 1fr}}
-  .step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
-  .step .n{font-family:Outfit;font-weight:800;font-size:13px;color:#06251c;background:var(--grad);
-    width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
-  .step .t{font-weight:700;font-size:14px;margin-bottom:3px}
-  .step .d{font-size:12.5px;color:var(--muted)}
-  .endcta{text-align:center;padding:40px 0 60px}
+  ul.feat li{display:flex;gap:12px;align-items:flex-start;color:var(--txt);font-size:15.5px}
+  ul.feat li:before{content:"";flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--grad2);margin-top:9px}
+  ul.feat li b{font-weight:700}
+  .endcta{text-align:center;padding:40px 0 56px}
   footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted2);font-size:13px;text-align:center}
   /* modal form */
-  .overlay{position:fixed;inset:0;background:rgba(3,4,7,.7);backdrop-filter:blur(6px);display:none;z-index:50;
+  .overlay{position:fixed;inset:0;background:rgba(11,11,11,.45);backdrop-filter:blur(5px);display:none;z-index:50;
     align-items:flex-start;justify-content:center;overflow-y:auto;padding:5vh 16px}
   .overlay.open{display:flex}
-  .modal{background:#0e1116;border:1px solid var(--line);border-radius:20px;width:520px;max-width:100%;
-    padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .modal{background:var(--bg2);border:1px solid var(--line);border-radius:20px;width:520px;max-width:100%;
+    padding:28px;box-shadow:0 30px 80px rgba(11,11,11,.22)}
   .modal h3{font-size:23px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
   .modal .msub{color:var(--muted);font-size:14px;margin-bottom:20px}
   .x{float:right;background:transparent;border:0;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
@@ -86,16 +86,16 @@
   .q{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px}
   .q .qt{font-size:13.5px;margin-bottom:9px}
   .seg{display:flex;gap:7px}
-  .seg button{flex:1;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:9px;
-    padding:7px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:600}
-  .seg button.on{background:var(--grad);border-color:transparent;color:#06251c}
+  .seg button{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--muted);border-radius:9px;
+    padding:8px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700}
+  .seg button.on{background:var(--grad);border-color:transparent;color:var(--ink)}
   .consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:4px 0 18px}
   .consent input{width:auto;margin-top:3px}
-  .submit{width:100%;background:var(--grad);color:#06251c;font-family:Outfit;font-weight:700;font-size:16px;
+  .submit{width:100%;background:var(--grad);color:var(--ink);font-family:Outfit;font-weight:800;font-size:16px;
     border:0;border-radius:12px;padding:15px;cursor:pointer}
   .submit:disabled{opacity:.5;cursor:not-allowed}
   .msg{margin-top:14px;padding:12px;border-radius:10px;font-size:13.5px;display:none}
-  .msg.err{display:block;background:rgba(239,68,68,.12);border:1px solid var(--err);color:#fecaca}
+  .msg.err{display:block;background:rgba(220,38,38,.08);border:1px solid var(--err);color:#b91c1c}
   .done{text-align:center;padding:24px 6px}
   .done .ic{font-size:46px}.done h3{margin:8px 0}
 </style>
@@ -105,9 +105,13 @@
 <nav>
   <div class="brand"><span class="logo"></span> raaamp</div>
   <div class="sp"></div>
-  <div class="lang" id="lang">
-    <button data-l="es" class="on">ES</button>
-    <button data-l="en">EN</button>
+  <div class="langwrap">
+    <span class="langhint" data-i18n="langhint"></span>
+    <div class="lang" id="lang">
+      <span class="globe">🌐</span>
+      <button data-l="es" class="on">Español</button>
+      <button data-l="en">English</button>
+    </div>
   </div>
 </nav>
 
@@ -148,11 +152,6 @@
   <section class="block">
     <h2 data-i18n="offer_h"></h2>
     <ul class="feat" id="offer_list"></ul>
-  </section>
-
-  <section class="block">
-    <h2 data-i18n="proc_h"></h2>
-    <div class="steps" id="steps"></div>
   </section>
 
   <section class="block">
@@ -204,42 +203,40 @@ const C = window.REC_CONFIG;
 
 const I18N = {
   es:{
+    langhint:"Elige tu idioma:",
     eyebrow:"Vacante abierta · 100% remoto", title1:"AI and Automation", title2:"Specialist",
-    sub:"Entrega soluciones de IA y automatización de alto impacto — desde el descubrimiento de requisitos hasta el prototipo y el despliegue en producción.",
+    sub:"Construye e integra sistemas con IA de punta a punta: APIs, automatizaciones y agentes. Trabajamos con desarrollo asistido por IA (Claude Code, Codex) y un enfoque spec-driven.",
     apply:"Aplicar",
-    chips:["📍 Remoto","🕐 Tiempo completo","🌐 Inglés intermedio+","🤖 n8n · Make · Python","🧠 LLMs · Agentes · RAG"],
+    chips:["📍 Remoto","🕐 Tiempo completo","🌐 Inglés intermedio+","🔌 REST · GraphQL · Webhooks","🤖 Claude Code · Codex","🧠 LLMs · Agentes · RAG"],
     about_h:"Sobre raaamp",
     about_p:"raaamp es una empresa de IA y automatización para compañías. Diseñamos y operamos agentes, automatizaciones e integraciones que escalan los procesos de marketing, soporte y operaciones de nuestros clientes — con tecnología de punta y un equipo pequeño de alto impacto.",
     summary_h:"Sobre el rol",
-    summary_p:"Buscamos un/a ingeniero/a individual contributor (nivel medio a senior) que construya e integre LLMs en flujos de negocio reales, vía APIs, plataformas de automatización y servicios de backend. Serás dueño/a del trabajo de punta a punta —del requerimiento al prototipo y a producción— colaborando de cerca con el equipo y los clientes.",
-    role_h:"Responsabilidades",
-    role:["Diseñar, desarrollar y desplegar soluciones de IA y automatización a la medida de los objetivos del cliente.",
-      "Traducir problemas de negocio en flujos y servicios de IA listos para producción, usando Python, plataformas de automatización (n8n / Make / Zapier) y APIs de LLMs.",
-      "Construir flujos agénticos (agents) e integraciones con modelos de lenguaje.",
-      "Implementar pipelines RAG con bases de datos vectoriales y búsqueda.",
-      "Lanzar prototipos rápidos y endurecerlos en sistemas escalables.",
-      "Mantener, monitorear e iterar las soluciones en producción.",
-      "Documentar soluciones y crear playbooks internos."],
+    summary_p:"Buscamos un perfil que se sienta extremadamente cómodo trabajando con APIs e integraciones, y que adopte el desarrollo asistido por agentes de IA con disciplina. Serás dueño/a del trabajo de punta a punta —del requerimiento al prototipo y a producción— escribiendo specs claras y aplicando buenas prácticas de ingeniería.",
+    role_h:"Qué harás",
+    role:["<b>Integrar APIs y servicios</b> de todo tipo: REST, GraphQL y webhooks, con autenticación (OAuth, API keys) y manejo robusto de errores.",
+      "<b>Construir automatizaciones y agentes</b> que conectan sistemas (n8n, Make, Python) e integran LLMs en flujos de negocio.",
+      "<b>Desarrollar con agentes de IA</b> (Claude Code, Codex) bajo un enfoque <b>spec-driven</b>: escribir specs claras y seguir el ciclo planificar → implementar → verificar.",
+      "Implementar pipelines <b>RAG</b> con bases de datos vectoriales y búsqueda.",
+      "Lanzar prototipos rápidos y endurecerlos en sistemas escalables, con <b>pruebas, revisión de código y documentación</b>.",
+      "Mantener, monitorear e iterar las soluciones en producción."],
     req_h:"Requisitos",
-    req:["2+ años de experiencia en ingeniería de software o IA (idealmente en automatización o GenAI).",
-      "Python sólido y experiencia construyendo APIs / servicios.",
-      "Integración práctica de LLMs: diseño de prompts, salidas estructuradas y evaluación básica.",
+    req:["<b>Dominio sólido de APIs</b>: REST y GraphQL, diseño y consumo, webhooks, autenticación (OAuth, API keys) e integraciones.",
+      "<b>Muy cómodo desarrollando con agentes de IA</b> (Claude Code, Codex) y con <b>desarrollo spec-driven</b> (la spec antes que el código).",
+      "Python sólido y construcción de servicios / backends.",
+      "<b>Buenas prácticas de desarrollo</b>: control de versiones (git), pruebas, revisión de código y documentación clara.",
+      "Integración de LLMs: diseño de prompts, salidas estructuradas y evaluación básica.",
       "Experiencia con al menos una plataforma de automatización (n8n, Make o Zapier).",
-      "Fundamentos de RAG y sistemas de recuperación.",
-      "Inglés al menos intermedio (lectura y escritura).",
-      "Autonomía, orientación a resultados y buena comunicación."],
+      "Inglés al menos intermedio (lectura y escritura)."],
     pref_h:"Deseable (plus)",
-    pref:["Frameworks de agentes (LangChain, LangGraph o similares).",
+    pref:["Toolkits spec-driven (GitHub Spec Kit) y frameworks de agentes (LangChain, LangGraph).",
       "Observabilidad / tracing (LangSmith, OpenTelemetry).",
-      "Docker, despliegue en la nube y patrones async / colas.",
+      "Docker, despliegue en la nube (Vercel, Supabase) y patrones async / colas.",
       "Bases de datos vectoriales o de grafos / knowledge graphs.",
       "Experiencia en startups o consultoría, en entornos de cara al cliente."],
     offer_h:"Qué ofrecemos",
     offer:["100% remoto, tiempo completo.","Proyectos retadores con IA de última generación.",
-      "Equipo pequeño, ágil y de alto impacto.","Crecimiento real y aprendizaje continuo."],
-    proc_h:"El proceso",
-    steps:[["1","Aplicas","2 min: 3 preguntas + tu CV."],["2","WhatsApp","Conversamos y validamos encaje."],
-      ["3","Prueba técnica","Un reto práctico con plazo."],["4","Entrevista","Charla final con el equipo."]],
+      "Stack moderno y desarrollo asistido por IA de primera clase.",
+      "Equipo pequeño, ágil y de alto impacto."],
     details_h:"Detalles", details:["💼 Tipo: contratado","🧭 Nivel: con experiencia","📍 100% remoto","🕐 Tiempo completo"],
     eo:"raaamp es un empleador que promueve la igualdad de oportunidades; valoramos la diversidad y la inclusión.",
     footer:"© raaamp · AI & Automation for Companies",
@@ -256,42 +253,40 @@ const I18N = {
     err_req:"Completa los campos obligatorios.", sending:"Enviando..."
   },
   en:{
+    langhint:"Choose your language:",
     eyebrow:"Open role · 100% remote", title1:"AI and Automation", title2:"Specialist",
-    sub:"Deliver high-impact AI and automation solutions — owning work from requirements discovery through prototype and production deployment.",
+    sub:"Build and integrate AI systems end to end: APIs, automations and agents. We work with AI-assisted development (Claude Code, Codex) and a spec-driven approach.",
     apply:"Apply",
-    chips:["📍 Remote","🕐 Full-time","🌐 Intermediate English+","🤖 n8n · Make · Python","🧠 LLMs · Agents · RAG"],
+    chips:["📍 Remote","🕐 Full-time","🌐 Intermediate English+","🔌 REST · GraphQL · Webhooks","🤖 Claude Code · Codex","🧠 LLMs · Agents · RAG"],
     about_h:"About raaamp",
     about_p:"raaamp is an AI & automation company for businesses. We design and run agents, automations and integrations that scale our clients' marketing, support and operations — with cutting-edge tech and a small, high-impact team.",
     summary_h:"About the role",
-    summary_p:"We're looking for a mid-to-senior individual contributor who builds and integrates LLMs into real business workflows via APIs, automation platforms and backend services. You'll own work end to end —from requirements to prototype to production— working closely with the team and clients.",
-    role_h:"Key responsibilities",
-    role:["Design, develop and deploy tailored AI and automation solutions aligned to client objectives.",
-      "Translate business problems into production-grade AI workflows and services using Python, automation tools (n8n / Make / Zapier) and LLM platforms/APIs.",
-      "Build agentic workflows and integrations with language models.",
-      "Implement RAG pipelines using vector databases and search.",
-      "Ship fast prototypes and harden them into scalable systems.",
-      "Maintain, monitor and iterate on production solutions.",
-      "Produce technical documentation and internal playbooks."],
-    req_h:"Required qualifications",
-    req:["2+ years of software or AI engineering experience (ideally in automation or GenAI).",
-      "Strong Python and experience building APIs / services.",
-      "Hands-on LLM integration: prompt design, structured outputs and basic evaluation.",
-      "Experience with at least one workflow automation platform (n8n, Make or Zapier).",
-      "RAG fundamentals and retrieval systems knowledge.",
-      "At least intermediate English (reading and writing).",
-      "Autonomy, results-orientation and clear communication."],
+    summary_p:"We're looking for someone extremely comfortable working with APIs and integrations, who embraces AI-agent-assisted development with discipline. You'll own work end to end —from requirements to prototype to production— writing clear specs and applying solid engineering practices.",
+    role_h:"What you'll do",
+    role:["<b>Integrate APIs and services</b> of all kinds: REST, GraphQL and webhooks, with authentication (OAuth, API keys) and robust error handling.",
+      "<b>Build automations and agents</b> that connect systems (n8n, Make, Python) and integrate LLMs into business workflows.",
+      "<b>Develop with AI agents</b> (Claude Code, Codex) using a <b>spec-driven</b> approach: write clear specs and follow the plan → implement → verify loop.",
+      "Implement <b>RAG</b> pipelines using vector databases and search.",
+      "Ship fast prototypes and harden them into scalable systems, with <b>tests, code review and documentation</b>.",
+      "Maintain, monitor and iterate on production solutions."],
+    req_h:"Requirements",
+    req:["<b>Strong command of APIs</b>: REST and GraphQL, design and consumption, webhooks, authentication (OAuth, API keys) and integrations.",
+      "<b>Very comfortable developing with AI agents</b> (Claude Code, Codex) and with <b>spec-driven development</b> (spec before code).",
+      "Strong Python and experience building services / backends.",
+      "<b>Solid engineering practices</b>: version control (git), testing, code review and clear documentation.",
+      "LLM integration: prompt design, structured outputs and basic evaluation.",
+      "Experience with at least one automation platform (n8n, Make or Zapier).",
+      "At least intermediate English (reading and writing)."],
     pref_h:"Nice to have",
-    pref:["Agent frameworks (LangChain, LangGraph or similar).",
+    pref:["Spec-driven toolkits (GitHub Spec Kit) and agent frameworks (LangChain, LangGraph).",
       "Observability / tracing (LangSmith, OpenTelemetry).",
-      "Docker, cloud deployment and async / queuing patterns.",
+      "Docker, cloud deployment (Vercel, Supabase) and async / queuing patterns.",
       "Vector or graph databases / knowledge graphs.",
       "Startup or consulting experience in client-facing settings."],
     offer_h:"What we offer",
     offer:["100% remote, full-time.","Challenging projects with state-of-the-art AI.",
-      "Small, fast, high-impact team.","Real growth and continuous learning."],
-    proc_h:"The process",
-    steps:[["1","You apply","2 min: 3 questions + your CV."],["2","WhatsApp","We chat and check the fit."],
-      ["3","Tech test","A practical challenge with a deadline."],["4","Interview","Final chat with the team."]],
+      "Modern stack and first-class AI-assisted development.",
+      "Small, fast, high-impact team."],
     details_h:"Details", details:["💼 Type: contracted","🧭 Level: experienced","📍 100% remote","🕐 Full-time"],
     eo:"raaamp is an Equal Opportunities Employer, committed to diversity and inclusion.",
     footer:"© raaamp · AI & Automation for Companies",
@@ -318,28 +313,22 @@ function render(){
   document.querySelectorAll("[data-i18n]").forEach(el=>{
     const v = t()[el.dataset.i18n]; if(typeof v==="string") el.textContent = v;
   });
-  // chips
   document.getElementById("chips").innerHTML = t().chips.map(c=>`<span class="chip">${c}</span>`).join("");
   fillList("role_list", t().role); fillList("req_list", t().req);
   fillList("pref_list", t().pref); fillList("offer_list", t().offer);
   document.getElementById("details").innerHTML = t().details.map(c=>`<span class="chip">${c}</span>`).join("");
-  document.getElementById("steps").innerHTML = t().steps.map(s=>
-    `<div class="step"><div class="n">${s[0]}</div><div class="t">${s[1]}</div><div class="d">${s[2]}</div></div>`).join("");
-  // knockout questions
   document.getElementById("kobox").innerHTML = t().ko.map((q,i)=>
     `<div class="q"><div class="qt">${q}</div><div class="seg" data-key="k${i}">
       <button type="button" data-v="si">${t().yes}</button>
       <button type="button" data-v="no">${t().no}</button></div></div>`).join("");
-  // restore selected ko
   Object.entries(answers).forEach(([k,v])=>{
     const seg=document.querySelector(`.seg[data-key="${k}"]`);
     if(seg){ const b=seg.querySelector(`button[data-v="${v}"]`); if(b) b.classList.add("on"); }
   });
   document.getElementById("cvLabel").textContent = cv.files[0] ? "📎 "+cv.files[0].name : t().f_cv_ph;
-  // lang buttons
   document.querySelectorAll("#lang button").forEach(b=>b.classList.toggle("on", b.dataset.l===lang));
 }
-function fillList(id, arr){ document.getElementById(id).innerHTML = arr.map(x=>`<li>${x}</li>`).join(""); }
+function fillList(id, arr){ document.getElementById(id).innerHTML = arr.map(x=>`<li><span>${x}</span></li>`).join(""); }
 
 const cv = document.getElementById("cv");
 cv.addEventListener("change",()=> document.getElementById("cvLabel").textContent = cv.files[0]?"📎 "+cv.files[0].name:t().f_cv_ph);
@@ -347,8 +336,6 @@ cv.addEventListener("change",()=> document.getElementById("cvLabel").textContent
 document.getElementById("lang").addEventListener("click",e=>{
   const b=e.target.closest("button[data-l]"); if(!b) return; lang=b.dataset.l; render();
 });
-
-// knockout selection (delegated, survives re-render)
 document.getElementById("kobox").addEventListener("click",e=>{
   const b=e.target.closest("button[data-v]"); if(!b) return;
   const seg=b.parentElement, key=seg.dataset.key;
@@ -356,18 +343,15 @@ document.getElementById("kobox").addEventListener("click",e=>{
   b.classList.add("on"); answers[key]=b.dataset.v;
 });
 
-// modal open/close
 const overlay=document.getElementById("overlay");
 document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>overlay.classList.add("open"));
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>overlay.classList.remove("open"));
 overlay.addEventListener("click",e=>{ if(e.target===overlay) overlay.classList.remove("open"); });
 
-// UTM
 const params=new URLSearchParams(location.search);
 const fuente=params.get("utm_source")||params.get("fuente")||"directo";
 const utm={}; for(const[k,v] of params) if(k.startsWith("utm_")) utm[k]=v;
 
-// submit
 const form=document.getElementById("form"), msg=document.getElementById("msg"), btn=document.getElementById("submit");
 form.addEventListener("submit", async e=>{
   e.preventDefault(); msg.className="msg";
