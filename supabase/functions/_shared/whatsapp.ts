@@ -70,6 +70,48 @@ export async function sendWhatsappText(to: string, body: string): Promise<WaSend
   }
 }
 
+/**
+ * Envía un TEMPLATE aprobado por Meta (necesario para iniciar conversación o
+ * fuera de la ventana de 24h). `params` son los valores posicionales {{1}}, {{2}}…
+ */
+export async function sendWhatsappTemplate(
+  to: string, name: string, lang: "es" | "en", params: string[],
+): Promise<WaSendResult> {
+  const p = provider();
+  if (!p) {
+    console.log(`[WA TEMPLATE SIMULADO] -> ${to}: ${name}(${params.join(", ")})`);
+    return { ok: true, simulado: true, provider_id: null };
+  }
+  const url = p === "kapso"
+    ? `https://api.kapso.ai/meta/whatsapp/${VERSION}/${PHONE_ID}/messages`
+    : `https://graph.facebook.com/${VERSION}/${PHONE_ID}/messages`;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (p === "kapso") headers["X-API-Key"] = KAPSO_KEY!;
+  else headers["Authorization"] = `Bearer ${META_TOKEN}`;
+
+  const components = params.length
+    ? [{ type: "body", parameters: params.map((t) => ({ type: "text", text: t })) }]
+    : [];
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: normalize(to),
+        type: "template",
+        template: { name, language: { code: lang }, components },
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return { ok: false, simulado: false, provider_id: null, error: JSON.stringify(data) };
+    return { ok: true, simulado: false, provider_id: data?.messages?.[0]?.id ?? null };
+  } catch (e) {
+    return { ok: false, simulado: false, provider_id: null, error: String(e) };
+  }
+}
+
 /** Quita caracteres no numéricos (Meta espera el número sin '+'). */
 function normalize(to: string): string {
   return to.replace(/[^\d]/g, "");

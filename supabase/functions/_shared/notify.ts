@@ -4,8 +4,9 @@
 import { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import type { Candidate, Settings } from "./supabase.ts";
 import { buildVars, render } from "./templates.ts";
-import { sendWhatsappText } from "./whatsapp.ts";
+import { sendWhatsappText, sendWhatsappTemplate } from "./whatsapp.ts";
 import { sendEmail, responsableEmail } from "./email.ts";
+import { WA_TEMPLATE_MAP, templatesEnabled } from "./wa_templates.ts";
 
 /**
  * Envía la comunicación `codigo` al destinatario que indique la plantilla.
@@ -30,7 +31,13 @@ export async function notify(
     if (!candidate.whatsapp_optin) {
       console.warn(`Candidato ${candidate.id} sin opt-in de WhatsApp; se omite ${codigo}`);
     } else {
-      const r = await sendWhatsappText(candidate.whatsapp, msg.cuerpo);
+      // Fuera de la ventana de 24h (notificaciones del pipeline) se usa el
+      // TEMPLATE aprobado por Meta; si los templates no están habilitados, texto libre.
+      const tref = WA_TEMPLATE_MAP[codigo];
+      const r = (templatesEnabled() && tref)
+        ? await sendWhatsappTemplate(candidate.whatsapp, tref.name, lang,
+            tref.params.map((k) => vars[k] ?? ""))
+        : await sendWhatsappText(candidate.whatsapp, msg.cuerpo);
       await sb.from("rec_messages").insert({
         candidate_id: candidate.id,
         direccion: "saliente",
