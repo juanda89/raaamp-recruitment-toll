@@ -22,7 +22,7 @@ reclutamiento/
 │  ├─ index.html                Landing + formulario + carga de CV  (/aplicar)
 │  ├─ prueba.html               Entrega de la prueba técnica (token) (/prueba)
 │  ├─ test.html                 Test de personalidad (token)         (/test)
-│  ├─ kanban.html               Tablero del responsable (auth)       (/kanban)
+│  ├─ candidates.html           Tablero del responsable (auth)       (/candidates)
 │  └─ config.js                 URL + anon key de Supabase
 ├─ supabase/
 │  ├─ migrations/               Esquema, seeds y cron (ejecutar en orden)
@@ -77,7 +77,7 @@ como settings de la base, luego ejecuta el archivo. Programa recordatorios
 
 ### 5) Frontend (Vercel)
 Despliega la carpeta `web/` como proyecto Vercel (sin build). `cleanUrls` sirve
-`/aplicar`, `/prueba`, `/test`, `/kanban`. Apunta `REC_PUBLIC_BASE_URL` al dominio
+`/aplicar`, `/prueba`, `/test`, `/candidates`. Apunta `REC_PUBLIC_BASE_URL` al dominio
 donde quede (p. ej. `https://raaamp.co` o `https://aplica.raaamp.co`). Edita la
 landing en `web/config.js` si cambias de proyecto Supabase.
 
