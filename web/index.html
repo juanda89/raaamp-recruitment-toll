@@ -3,192 +3,352 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Aplica · AI and Automation Specialist · raaamp</title>
-<meta name="description" content="Aplica al cargo de AI and Automation Specialist en raaamp." />
+<title>AI and Automation Specialist · raaamp</title>
+<meta name="description" content="Únete a raaamp como AI and Automation Specialist. 100% remoto." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0b0f17; --panel:#121826; --panel2:#0e1420; --line:#1f2937;
-    --txt:#e6edf6; --muted:#93a1b5; --brand:#6d5efc; --brand2:#38bdf8;
-    --ok:#22c55e; --err:#ef4444; --radius:14px;
+    --bg:#0B0B0B; --bg2:#05070b; --panel:rgba(255,255,255,.04); --panel2:rgba(255,255,255,.02);
+    --line:rgba(255,255,255,.10); --txt:#F8FAFC; --muted:#94A3B8; --muted2:#64748B;
+    --lime:#c7ff8a; --cyan:#8affe6; --grad:linear-gradient(135deg,#c7ff8a 0%,#8affe6 100%);
+    --err:#ef4444; --ok:#c7ff8a;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    background:radial-gradient(1200px 600px at 50% -10%,#182238,transparent),var(--bg);
-    color:var(--txt);line-height:1.55;min-height:100vh}
-  .wrap{max-width:760px;margin:0 auto;padding:32px 20px 80px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.5px}
-  .dot{width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
-  .hero{margin:36px 0 8px}
-  h1{font-size:30px;margin:0 0 8px;line-height:1.2}
-  .lead{color:var(--muted);font-size:16px;margin:0 0 8px}
-  .pill{display:inline-block;font-size:12px;color:var(--brand2);border:1px solid var(--line);
-    border-radius:999px;padding:4px 10px;margin-top:8px}
-  form{margin-top:28px;background:var(--panel);border:1px solid var(--line);
-    border-radius:var(--radius);padding:24px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:560px){.grid{grid-template-columns:1fr}}
-  label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px}
-  .req:after{content:" *";color:var(--brand2)}
-  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);
-    color:var(--txt);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand)}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--txt);line-height:1.6;
+    background:
+      radial-gradient(900px 500px at 85% -5%,rgba(138,255,230,.10),transparent),
+      radial-gradient(900px 500px at 0% 10%,rgba(199,255,138,.08),transparent),
+      var(--bg);}
+  h1,h2,h3{font-family:Outfit,sans-serif;line-height:1.12;margin:0}
+  a{color:inherit}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  /* nav */
+  nav{display:flex;align-items:center;gap:14px;padding:22px 0;max-width:880px;margin:0 auto;padding-left:22px;padding-right:22px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:Outfit;font-weight:800;font-size:19px;letter-spacing:-.3px}
+  .logo{width:14px;height:14px;border-radius:50%;background:var(--grad)}
+  .sp{flex:1}
+  .lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:13px}
+  .lang button{background:transparent;border:0;color:var(--muted);padding:6px 13px;cursor:pointer;font-family:Manrope;font-weight:600}
+  .lang button.on{background:var(--grad);color:#06251c}
+  /* hero */
+  .hero{padding:26px 0 10px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--lime);
+    border:1px solid var(--line);border-radius:999px;padding:5px 13px;margin-bottom:20px}
+  .eyebrow .pdot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)}
+  h1.title{font-size:46px;font-weight:800;letter-spacing:-1.5px;margin-bottom:14px}
+  h1.title .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{font-size:18px;color:var(--muted);max-width:640px;margin-bottom:22px}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:28px}
+  .chip{font-size:13px;font-weight:600;color:var(--txt);background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:7px 14px}
+  .cta{display:inline-flex;align-items:center;gap:9px;background:var(--grad);color:#06251c;font-family:Outfit;
+    font-weight:700;font-size:16px;border:0;border-radius:12px;padding:15px 28px;cursor:pointer;
+    box-shadow:0 10px 30px rgba(138,255,230,.18);transition:transform .15s,box-shadow .15s}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(138,255,230,.28)}
+  .cta.sm{font-size:15px;padding:13px 24px}
+  /* sections */
+  section.block{padding:26px 0;border-top:1px solid var(--line)}
+  .block h2{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:14px}
+  .block p{color:var(--muted);margin:0 0 12px}
+  ul.feat{list-style:none;padding:0;margin:0;display:grid;gap:11px}
+  ul.feat li{display:flex;gap:11px;align-items:flex-start;color:var(--txt)}
+  ul.feat li:before{content:"";flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:var(--grad);margin-top:9px}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:620px){.steps{grid-template-columns:1fr 1fr}}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
+  .step .n{font-family:Outfit;font-weight:800;font-size:13px;color:#06251c;background:var(--grad);
+    width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+  .step .t{font-weight:700;font-size:14px;margin-bottom:3px}
+  .step .d{font-size:12.5px;color:var(--muted)}
+  .endcta{text-align:center;padding:40px 0 60px}
+  footer{border-top:1px solid var(--line);padding:24px 0;color:var(--muted2);font-size:13px;text-align:center}
+  /* modal form */
+  .overlay{position:fixed;inset:0;background:rgba(3,4,7,.7);backdrop-filter:blur(6px);display:none;z-index:50;
+    align-items:flex-start;justify-content:center;overflow-y:auto;padding:5vh 16px}
+  .overlay.open{display:flex}
+  .modal{background:#0e1116;border:1px solid var(--line);border-radius:20px;width:520px;max-width:100%;
+    padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .modal h3{font-size:23px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
+  .modal .msub{color:var(--muted);font-size:14px;margin-bottom:20px}
+  .x{float:right;background:transparent;border:0;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+  label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px;font-weight:600}
+  .req:after{content:" *";color:var(--cyan)}
+  input{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:11px;padding:12px 13px;font-size:14.5px;font-family:inherit}
+  input:focus{outline:none;border-color:var(--cyan)}
   .field{margin-bottom:16px}
-  .file{border:1px dashed var(--line);border-radius:10px;padding:16px;text-align:center;cursor:pointer}
-  .file:hover{border-color:var(--brand)}
-  .ko{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
-  .ko-q{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px}
-  .seg{display:flex;gap:6px}
-  .seg button{flex:0 0 auto;background:transparent;border:1px solid var(--line);color:var(--muted);
-    border-radius:8px;padding:6px 14px;cursor:pointer;font-size:13px}
-  .seg button.on{background:var(--brand);border-color:var(--brand);color:#fff}
-  .consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted)}
+  .file{border:1.5px dashed var(--line);border-radius:11px;padding:16px;text-align:center;cursor:pointer;color:var(--muted);font-size:14px}
+  .file:hover{border-color:var(--cyan);color:var(--txt)}
+  .q{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px}
+  .q .qt{font-size:13.5px;margin-bottom:9px}
+  .seg{display:flex;gap:7px}
+  .seg button{flex:1;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:9px;
+    padding:7px;cursor:pointer;font-size:13px;font-family:inherit;font-weight:600}
+  .seg button.on{background:var(--grad);border-color:transparent;color:#06251c}
+  .consent{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:4px 0 18px}
   .consent input{width:auto;margin-top:3px}
-  .submit{margin-top:8px;width:100%;background:linear-gradient(135deg,var(--brand),var(--brand2));
-    border:none;color:#fff;font-weight:600;font-size:15px;padding:14px;border-radius:10px;cursor:pointer}
-  .submit:disabled{opacity:.55;cursor:not-allowed}
-  .note{font-size:12px;color:var(--muted);margin-top:14px}
-  .msg{margin-top:16px;padding:14px;border-radius:10px;display:none}
-  .msg.ok{display:block;background:rgba(34,197,94,.1);border:1px solid var(--ok);color:#bbf7d0}
-  .msg.err{display:block;background:rgba(239,68,68,.1);border:1px solid var(--err);color:#fecaca}
-  .done{text-align:center;padding:40px 0}
-  .done h2{font-size:24px}.check{font-size:48px}
+  .submit{width:100%;background:var(--grad);color:#06251c;font-family:Outfit;font-weight:700;font-size:16px;
+    border:0;border-radius:12px;padding:15px;cursor:pointer}
+  .submit:disabled{opacity:.5;cursor:not-allowed}
+  .msg{margin-top:14px;padding:12px;border-radius:10px;font-size:13.5px;display:none}
+  .msg.err{display:block;background:rgba(239,68,68,.12);border:1px solid var(--err);color:#fecaca}
+  .done{text-align:center;padding:24px 6px}
+  .done .ic{font-size:46px}.done h3{margin:8px 0}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="brand"><span class="dot"></span> raaamp</div>
 
-  <div class="hero" id="hero">
-    <span class="pill">Vacante abierta</span>
-    <h1>AI and Automation Specialist</h1>
-    <p class="lead">Construimos automatizaciones e integraciones con IA. Buscamos a alguien con
-      experiencia en n8n / Make / Python e integración de APIs y modelos de lenguaje.
-      Aplica abajo: el proceso es ágil y te acompañamos por WhatsApp.</p>
+<nav>
+  <div class="brand"><span class="logo"></span> raaamp</div>
+  <div class="sp"></div>
+  <div class="lang" id="lang">
+    <button data-l="es" class="on">ES</button>
+    <button data-l="en">EN</button>
   </div>
+</nav>
 
-  <form id="form" novalidate>
-    <div class="grid">
-      <div class="field"><label class="req">Nombre completo</label>
-        <input name="nombre" required autocomplete="name" /></div>
-      <div class="field"><label>Correo electrónico</label>
-        <input name="email" type="email" autocomplete="email" /></div>
+<main class="wrap">
+  <header class="hero">
+    <span class="eyebrow"><span class="pdot"></span><span data-i18n="eyebrow"></span></span>
+    <h1 class="title"><span data-i18n="title1"></span> <span class="g" data-i18n="title2"></span></h1>
+    <p class="sub" data-i18n="sub"></p>
+    <div class="chips" id="chips"></div>
+    <button class="cta" data-open><span data-i18n="apply"></span> →</button>
+  </header>
+
+  <section class="block">
+    <h2 data-i18n="about_h"></h2>
+    <p data-i18n="about_p"></p>
+  </section>
+
+  <section class="block">
+    <h2 data-i18n="role_h"></h2>
+    <ul class="feat" id="role_list"></ul>
+  </section>
+
+  <section class="block">
+    <h2 data-i18n="req_h"></h2>
+    <ul class="feat" id="req_list"></ul>
+  </section>
+
+  <section class="block">
+    <h2 data-i18n="offer_h"></h2>
+    <ul class="feat" id="offer_list"></ul>
+  </section>
+
+  <section class="block">
+    <h2 data-i18n="proc_h"></h2>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <div class="endcta">
+    <button class="cta" data-open><span data-i18n="apply"></span> →</button>
+  </div>
+</main>
+
+<footer><span data-i18n="footer"></span></footer>
+
+<!-- FORM modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div id="formView">
+      <button class="x" data-close>✕</button>
+      <h3 data-i18n="f_title"></h3>
+      <p class="msub" data-i18n="f_sub"></p>
+      <form id="form" novalidate>
+        <div class="field"><label class="req" data-i18n="f_name"></label><input name="nombre" required></div>
+        <div class="field"><label class="req" data-i18n="f_wa"></label><input name="whatsapp" required inputmode="tel" placeholder="+57..."></div>
+        <div class="field"><label data-i18n="f_email"></label><input name="email" type="email"></div>
+        <div class="field" id="kobox"></div>
+        <div class="field">
+          <label class="req" data-i18n="f_cv"></label>
+          <label class="file" for="cv" id="cvLabel"></label>
+          <input id="cv" type="file" accept=".pdf,.doc,.docx" hidden required>
+        </div>
+        <div class="consent"><input id="optin" type="checkbox" required><label for="optin" style="margin:0;color:var(--muted)" data-i18n="f_consent"></label></div>
+        <button class="submit" id="submit" type="submit" data-i18n="f_send"></button>
+        <div class="msg" id="msg"></div>
+      </form>
     </div>
-
-    <div class="field"><label class="req">WhatsApp (con indicativo, ej. +57 300 123 4567)</label>
-      <input name="whatsapp" required inputmode="tel" placeholder="+57..." /></div>
-
-    <div class="field"><label class="req">Hoja de vida (PDF, máx. 10 MB)</label>
-      <label class="file" for="cv" id="cvLabel">Haz clic para adjuntar tu CV en PDF</label>
-      <input id="cv" name="cv" type="file" accept=".pdf,.doc,.docx" hidden required /></div>
-
-    <div class="field">
-      <label>Requisitos mínimos</label>
-      <div id="knockout"></div>
+    <div id="doneView" class="done" style="display:none">
+      <div class="ic">✅</div>
+      <h3 data-i18n="f_done_h"></h3>
+      <p class="msub" data-i18n="f_done_p"></p>
     </div>
-
-    <div class="field consent">
-      <input id="optin" type="checkbox" required />
-      <label for="optin" style="margin:0;color:var(--muted)">Autorizo que <b>raaamp</b> me contacte por
-        <b>WhatsApp</b> durante el proceso de selección y el tratamiento de mis datos personales conforme a la
-        política de privacidad (Ley 1581 de 2012 — habeas data).</label>
-    </div>
-
-    <button class="submit" id="submit" type="submit">Enviar aplicación</button>
-    <p class="note">Tus datos se usan únicamente para este proceso de selección. Toda la comunicación será por WhatsApp.</p>
-    <div class="msg" id="msg"></div>
-  </form>
-
-  <div class="done" id="done" style="display:none">
-    <div class="check">✅</div>
-    <h2>¡Aplicación recibida!</h2>
-    <p class="lead">Gracias por aplicar. Revisaremos tu perfil y te escribiremos por WhatsApp con los siguientes pasos.</p>
   </div>
 </div>
 
 <script src="./config.js"></script>
 <script>
-  const C = window.REC_CONFIG;
+const C = window.REC_CONFIG;
 
-  // Requisitos mínimos (knockout). Editable según el perfil (PRD Apéndice A).
-  const KNOCKOUT = [
-    { key: "experiencia", q: "¿Tienes experiencia con automatización (n8n, Make, Zapier) o Python?" },
-    { key: "tiempo_completo", q: "¿Puedes trabajar tiempo completo?" },
-    { key: "ingles", q: "¿Tu nivel de inglés es al menos intermedio?" },
-  ];
-  const answers = {};
-  const koEl = document.getElementById("knockout");
-  KNOCKOUT.forEach(item => {
-    const row = document.createElement("div");
-    row.className = "ko";
-    row.innerHTML = `<div class="ko-q"><span>${item.q}</span>
-      <div class="seg" data-key="${item.key}">
-        <button type="button" data-v="si">Sí</button>
-        <button type="button" data-v="no">No</button>
-      </div></div>`;
-    koEl.appendChild(row);
+const I18N = {
+  es:{
+    eyebrow:"Vacante abierta · 100% remoto", title1:"AI and Automation", title2:"Specialist",
+    sub:"Construye agentes, automatizaciones e integraciones con IA que escalan operaciones reales. Únete a raaamp.",
+    apply:"Aplicar",
+    chips:["📍 Remoto","🕐 Tiempo completo","🌐 Inglés intermedio+","🤖 n8n · Make · Python"],
+    about_h:"Sobre raaamp",
+    about_p:"raaamp es una empresa de IA y automatización para compañías. Diseñamos y operamos agentes, automatizaciones e integraciones que escalan los procesos de marketing, soporte y operaciones de nuestros clientes — con tecnología de punta y un equipo pequeño de alto impacto.",
+    role_h:"Qué harás",
+    role:["Diseñar y construir automatizaciones e integraciones de punta a punta (n8n, Make, Python).",
+      "Conectar APIs y modelos de lenguaje (LLMs) para crear agentes y flujos inteligentes.",
+      "Automatizar procesos internos y de clientes, midiendo el impacto.",
+      "Mantener, monitorear y mejorar flujos en producción."],
+    req_h:"Requisitos",
+    req:["Experiencia con herramientas de automatización (n8n, Make o Zapier) y scripting en Python.",
+      "Integración de APIs y LLMs; nociones de agentes y prompting.",
+      "Bases de datos, webhooks y despliegue (Vercel, Supabase o similares).",
+      "Inglés al menos intermedio (lectura y escritura).",
+      "Autonomía, orientación a resultados y buena comunicación."],
+    offer_h:"Qué ofrecemos",
+    offer:["100% remoto, tiempo completo.","Proyectos retadores con IA de última generación.",
+      "Equipo pequeño, ágil y de alto impacto.","Crecimiento real y aprendizaje continuo."],
+    proc_h:"El proceso",
+    steps:[["1","Aplicas","2 min: 3 preguntas + tu CV."],["2","WhatsApp","Conversamos y validamos encaje."],
+      ["3","Prueba técnica","Un reto práctico con plazo."],["4","Entrevista","Charla final con el equipo."]],
+    footer:"© raaamp · AI & Automation for Companies",
+    f_title:"Aplica a la vacante", f_sub:"Toma menos de 2 minutos. Te contactaremos por WhatsApp.",
+    f_name:"Nombre completo", f_wa:"WhatsApp (con indicativo)", f_email:"Correo (opcional)",
+    f_cv:"Hoja de vida (PDF)", f_cv_ph:"Haz clic para adjuntar tu CV",
+    f_consent:"Autorizo a raaamp a contactarme por WhatsApp y el tratamiento de mis datos (Ley 1581 de 2012).",
+    f_send:"Enviar aplicación",
+    ko:["¿Tienes experiencia con automatización (n8n, Make, Zapier) o Python?",
+        "¿Puedes trabajar tiempo completo?","¿Tu nivel de inglés es al menos intermedio?"],
+    yes:"Sí", no:"No",
+    f_done_h:"¡Aplicación recibida!", f_done_p:"Gracias por aplicar. Te escribiremos por WhatsApp con los siguientes pasos.",
+    err_ko:"Responde las 3 preguntas.", err_consent:"Necesitamos tu consentimiento.", err_cv:"Adjunta tu hoja de vida.",
+    err_req:"Completa los campos obligatorios.", sending:"Enviando..."
+  },
+  en:{
+    eyebrow:"Open role · 100% remote", title1:"AI and Automation", title2:"Specialist",
+    sub:"Build AI agents, automations and integrations that scale real operations. Join raaamp.",
+    apply:"Apply",
+    chips:["📍 Remote","🕐 Full-time","🌐 Intermediate English+","🤖 n8n · Make · Python"],
+    about_h:"About raaamp",
+    about_p:"raaamp is an AI & automation company for businesses. We design and run agents, automations and integrations that scale our clients' marketing, support and operations — with cutting-edge tech and a small, high-impact team.",
+    role_h:"What you'll do",
+    role:["Design and build end-to-end automations and integrations (n8n, Make, Python).",
+      "Connect APIs and language models (LLMs) to create smart agents and workflows.",
+      "Automate internal and client processes, measuring the impact.",
+      "Maintain, monitor and improve production workflows."],
+    req_h:"Requirements",
+    req:["Experience with automation tools (n8n, Make or Zapier) and Python scripting.",
+      "API and LLM integration; familiarity with agents and prompting.",
+      "Databases, webhooks and deployment (Vercel, Supabase or similar).",
+      "At least intermediate English (reading and writing).",
+      "Autonomy, results-orientation and clear communication."],
+    offer_h:"What we offer",
+    offer:["100% remote, full-time.","Challenging projects with state-of-the-art AI.",
+      "Small, fast, high-impact team.","Real growth and continuous learning."],
+    proc_h:"The process",
+    steps:[["1","You apply","2 min: 3 questions + your CV."],["2","WhatsApp","We chat and check the fit."],
+      ["3","Tech test","A practical challenge with a deadline."],["4","Interview","Final chat with the team."]],
+    footer:"© raaamp · AI & Automation for Companies",
+    f_title:"Apply for this role", f_sub:"Takes under 2 minutes. We'll reach out on WhatsApp.",
+    f_name:"Full name", f_wa:"WhatsApp (with country code)", f_email:"Email (optional)",
+    f_cv:"Resume (PDF)", f_cv_ph:"Click to attach your CV",
+    f_consent:"I authorize raaamp to contact me on WhatsApp and to process my data.",
+    f_send:"Submit application",
+    ko:["Do you have experience with automation (n8n, Make, Zapier) or Python?",
+        "Can you work full-time?","Is your English at least intermediate?"],
+    yes:"Yes", no:"No",
+    f_done_h:"Application received!", f_done_p:"Thanks for applying. We'll message you on WhatsApp with next steps.",
+    err_ko:"Please answer the 3 questions.", err_consent:"We need your consent.", err_cv:"Please attach your resume.",
+    err_req:"Please complete the required fields.", sending:"Sending..."
+  }
+};
+
+let lang = (navigator.language||"es").startsWith("en") ? "en" : "es";
+const answers = {};
+
+function t(){ return I18N[lang]; }
+function render(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const v = t()[el.dataset.i18n]; if(typeof v==="string") el.textContent = v;
   });
-  koEl.addEventListener("click", e => {
-    const b = e.target.closest("button[data-v]"); if(!b) return;
-    const seg = b.parentElement; const key = seg.dataset.key;
-    seg.querySelectorAll("button").forEach(x => x.classList.remove("on"));
-    b.classList.add("on"); answers[key] = b.dataset.v;
+  // chips
+  document.getElementById("chips").innerHTML = t().chips.map(c=>`<span class="chip">${c}</span>`).join("");
+  fillList("role_list", t().role); fillList("req_list", t().req); fillList("offer_list", t().offer);
+  document.getElementById("steps").innerHTML = t().steps.map(s=>
+    `<div class="step"><div class="n">${s[0]}</div><div class="t">${s[1]}</div><div class="d">${s[2]}</div></div>`).join("");
+  // knockout questions
+  document.getElementById("kobox").innerHTML = t().ko.map((q,i)=>
+    `<div class="q"><div class="qt">${q}</div><div class="seg" data-key="k${i}">
+      <button type="button" data-v="si">${t().yes}</button>
+      <button type="button" data-v="no">${t().no}</button></div></div>`).join("");
+  // restore selected ko
+  Object.entries(answers).forEach(([k,v])=>{
+    const seg=document.querySelector(`.seg[data-key="${k}"]`);
+    if(seg){ const b=seg.querySelector(`button[data-v="${v}"]`); if(b) b.classList.add("on"); }
   });
+  document.getElementById("cvLabel").textContent = cv.files[0] ? "📎 "+cv.files[0].name : t().f_cv_ph;
+  // lang buttons
+  document.querySelectorAll("#lang button").forEach(b=>b.classList.toggle("on", b.dataset.l===lang));
+}
+function fillList(id, arr){ document.getElementById(id).innerHTML = arr.map(x=>`<li>${x}</li>`).join(""); }
 
-  // UTM / fuente
-  const params = new URLSearchParams(location.search);
-  const fuente = params.get("utm_source") || params.get("fuente") || "directo";
-  const utm = {}; for (const [k,v] of params) if (k.startsWith("utm_")) utm[k]=v;
+const cv = document.getElementById("cv");
+cv.addEventListener("change",()=> document.getElementById("cvLabel").textContent = cv.files[0]?"📎 "+cv.files[0].name:t().f_cv_ph);
 
-  const cv = document.getElementById("cv");
-  const cvLabel = document.getElementById("cvLabel");
-  cv.addEventListener("change", () => {
-    cvLabel.textContent = cv.files[0] ? "📎 " + cv.files[0].name : "Haz clic para adjuntar tu CV en PDF";
-  });
+document.getElementById("lang").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-l]"); if(!b) return; lang=b.dataset.l; render();
+});
 
-  const form = document.getElementById("form");
-  const msg = document.getElementById("msg");
-  const btn = document.getElementById("submit");
+// knockout selection (delegated, survives re-render)
+document.getElementById("kobox").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-v]"); if(!b) return;
+  const seg=b.parentElement, key=seg.dataset.key;
+  seg.querySelectorAll("button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); answers[key]=b.dataset.v;
+});
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    msg.className = "msg";
-    if (Object.keys(answers).length < KNOCKOUT.length) {
-      return showErr("Responde todas las preguntas de requisitos mínimos.");
-    }
-    if (!document.getElementById("optin").checked) {
-      return showErr("Necesitamos tu consentimiento para continuar.");
-    }
-    if (!cv.files[0]) return showErr("Adjunta tu hoja de vida.");
+// modal open/close
+const overlay=document.getElementById("overlay");
+document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>overlay.classList.add("open"));
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>overlay.classList.remove("open"));
+overlay.addEventListener("click",e=>{ if(e.target===overlay) overlay.classList.remove("open"); });
 
-    btn.disabled = true; btn.textContent = "Enviando...";
-    try {
-      const fd = new FormData();
-      fd.append("nombre", form.nombre.value.trim());
-      fd.append("email", form.email.value.trim());
-      fd.append("whatsapp", form.whatsapp.value.trim());
-      fd.append("whatsapp_optin", "true");
-      fd.append("fuente", fuente);
-      fd.append("utm", JSON.stringify(utm));
-      fd.append("knockout", JSON.stringify(answers));
-      fd.append("cv", cv.files[0]);
+// UTM
+const params=new URLSearchParams(location.search);
+const fuente=params.get("utm_source")||params.get("fuente")||"directo";
+const utm={}; for(const[k,v] of params) if(k.startsWith("utm_")) utm[k]=v;
 
-      const res = await fetch(`${C.FUNCTIONS_URL}/ingest-lead`, {
-        method: "POST",
-        headers: { apikey: C.ANON_KEY, Authorization: `Bearer ${C.ANON_KEY}` },
-        body: fd,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al enviar");
-      document.getElementById("form").style.display = "none";
-      document.getElementById("hero").style.display = "none";
-      document.getElementById("done").style.display = "block";
-    } catch (err) {
-      showErr(err.message || "No pudimos enviar tu aplicación. Intenta de nuevo.");
-      btn.disabled = false; btn.textContent = "Enviar aplicación";
-    }
-  });
+// submit
+const form=document.getElementById("form"), msg=document.getElementById("msg"), btn=document.getElementById("submit");
+form.addEventListener("submit", async e=>{
+  e.preventDefault(); msg.className="msg";
+  if(!form.nombre.value.trim()||!form.whatsapp.value.trim()) return showErr(t().err_req);
+  if(Object.keys(answers).length<3) return showErr(t().err_ko);
+  if(!document.getElementById("optin").checked) return showErr(t().err_consent);
+  if(!cv.files[0]) return showErr(t().err_cv);
+  btn.disabled=true; btn.textContent=t().sending;
+  try{
+    const ko={experiencia:answers.k0,tiempo_completo:answers.k1,ingles:answers.k2};
+    const fd=new FormData();
+    fd.append("nombre",form.nombre.value.trim());
+    fd.append("email",form.email.value.trim());
+    fd.append("whatsapp",form.whatsapp.value.trim());
+    fd.append("whatsapp_optin","true");
+    fd.append("fuente",fuente); fd.append("utm",JSON.stringify(utm));
+    fd.append("knockout",JSON.stringify(ko)); fd.append("cv",cv.files[0]);
+    const res=await fetch(`${C.FUNCTIONS_URL}/ingest-lead`,{
+      method:"POST", headers:{apikey:C.ANON_KEY,Authorization:`Bearer ${C.ANON_KEY}`}, body:fd });
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||"Error");
+    document.getElementById("formView").style.display="none";
+    document.getElementById("doneView").style.display="block";
+    render();
+  }catch(err){ showErr(err.message||"Error"); btn.disabled=false; btn.textContent=t().f_send; }
+});
+function showErr(x){ msg.className="msg err"; msg.textContent=x; }
 
-  function showErr(t){ msg.className="msg err"; msg.textContent=t; }
+render();
 </script>
 </body>
 </html>
