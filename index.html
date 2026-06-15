@@ -30,8 +30,10 @@
   .wrap{max-width:900px;margin:0 auto;padding:0 22px}
   /* nav + language */
   nav{display:flex;align-items:center;gap:14px;max-width:900px;margin:0 auto;padding:20px 22px}
-  .brand{display:flex;align-items:center;gap:10px;font-family:Outfit;font-weight:800;font-size:20px;letter-spacing:-.3px}
-  .logo{width:14px;height:14px;border-radius:50%;background:var(--grad2)}
+  .brand{display:flex;align-items:center;gap:11px;font-family:Outfit;font-weight:700;font-size:24px;letter-spacing:-.6px}
+  .logomark{width:38px;height:38px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#c7ff8a 0%,#8affe6 100%);
+    box-shadow:0 0 0 1px rgba(255,255,255,.35),0 10px 28px -14px rgba(138,255,230,.8)}
   .sp{flex:1}
   .langwrap{display:flex;align-items:center;gap:10px}
   .langhint{font-size:12.5px;color:var(--muted);font-weight:600;display:none}
@@ -121,7 +123,7 @@
 <body>
 
 <nav>
-  <div class="brand"><span class="logo"></span> raaamp</div>
+  <div class="brand"><span class="logomark"><svg viewBox="0 0 36 36" width="22" height="22" aria-hidden="true"><g transform="rotate(-25 18 18)"><line x1="9" y1="14" x2="27" y2="14" stroke="#0B0B0B" stroke-width="4" stroke-linecap="round"/><line x1="9" y1="22" x2="27" y2="22" stroke="#0B0B0B" stroke-width="4" stroke-linecap="round"/></g></svg></span> raaamp</div>
   <div class="sp"></div>
   <div class="langwrap">
     <span class="langhint" data-i18n="langhint"></span>
@@ -242,7 +244,7 @@ const I18N = {
     eyebrow:"Vacante abierta · 100% remoto", title1:"AI and Automation", title2:"Specialist",
     sub:"Construye e integra sistemas con IA de punta a punta: APIs, automatizaciones y agentes. Trabajamos con desarrollo asistido por IA (Claude Code, Codex) y un enfoque spec-driven.",
     apply:"Aplicar",
-    chips:["💵 USD 1.500–2.500 / mes","📍 Remoto","🕐 Tiempo completo","🌐 Inglés intermedio+","🔌 REST · GraphQL · Webhooks","🤖 Claude Code · Codex","🧠 LLMs · Agentes · RAG"],
+    chips:["📍 Remoto","🕐 Tiempo completo","🔌 REST · GraphQL · Webhooks","🤖 Claude Code · Codex","🧠 LLMs · Agentes · RAG"],
     about_h:"Sobre raaamp",
     about_p:"raaamp es una empresa de IA y automatización para compañías. Diseñamos y operamos agentes, automatizaciones e integraciones que escalan los procesos de marketing, soporte y operaciones de nuestros clientes — con tecnología de punta y un equipo pequeño de alto impacto.",
     summary_h:"Sobre el rol",
@@ -295,7 +297,7 @@ const I18N = {
     eyebrow:"Open role · 100% remote", title1:"AI and Automation", title2:"Specialist",
     sub:"Build and integrate AI systems end to end: APIs, automations and agents. We work with AI-assisted development (Claude Code, Codex) and a spec-driven approach.",
     apply:"Apply",
-    chips:["💵 USD 1,500–2,500 / mo","📍 Remote","🕐 Full-time","🌐 Intermediate English+","🔌 REST · GraphQL · Webhooks","🤖 Claude Code · Codex","🧠 LLMs · Agents · RAG"],
+    chips:["📍 Remote","🕐 Full-time","🔌 REST · GraphQL · Webhooks","🤖 Claude Code · Codex","🧠 LLMs · Agents · RAG"],
     about_h:"About raaamp",
     about_p:"raaamp is an AI & automation company for businesses. We design and run agents, automations and integrations that scale our clients' marketing, support and operations — with cutting-edge tech and a small, high-impact team.",
     summary_h:"About the role",
