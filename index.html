@@ -84,8 +84,13 @@
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235B6675' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
     background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
   .field{margin-bottom:16px}
-  .file{border:1.5px dashed var(--line);border-radius:11px;padding:16px;text-align:center;cursor:pointer;color:var(--muted);font-size:14px}
-  .file:hover{border-color:var(--cyan);color:var(--txt)}
+  .warow{display:flex;gap:8px}
+  .warow select{flex:0 0 auto;width:150px}
+  .warow input{flex:1;min-width:0}
+  .file{border:1.5px dashed var(--line);border-radius:14px;min-height:150px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:8px;text-align:center;cursor:pointer;color:var(--muted);font-size:14px;padding:18px}
+  .file:hover{border-color:var(--cyan);color:var(--txt);background:var(--panel2)}
+  .file .upic{font-size:30px;line-height:1}
   .q{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px}
   .q .qt{font-size:13.5px;margin-bottom:9px}
   .seg{display:flex;gap:7px}
@@ -179,13 +184,15 @@
       <p class="msub" data-i18n="f_sub"></p>
       <form id="form" novalidate>
         <div class="field"><label class="req" data-i18n="f_name"></label><input name="nombre" required></div>
-        <div class="field"><label class="req" data-i18n="f_wa"></label><input name="whatsapp" required inputmode="tel" placeholder="+57..."></div>
+        <div class="field"><label class="req" data-i18n="f_wa"></label>
+          <div class="warow"><select id="cc"></select><input id="wanum" inputmode="tel" placeholder="300 123 4567"></div>
+        </div>
         <div class="field"><label data-i18n="f_email"></label><input name="email" type="email"></div>
         <div class="field" id="kobox"></div>
         <div class="field"><label class="req" data-i18n="f_english"></label><select id="english"></select></div>
         <div class="field">
           <label class="req" data-i18n="f_cv"></label>
-          <label class="file" for="cv" id="cvLabel"></label>
+          <label class="file" for="cv"><span class="upic">📄</span><span id="cvLabel"></span></label>
           <input id="cv" type="file" accept=".pdf,.doc,.docx" hidden required>
         </div>
         <div class="consent"><input id="optin" type="checkbox" required><label for="optin" style="margin:0;color:var(--muted)" data-i18n="f_consent"></label></div>
@@ -202,8 +209,17 @@
 </div>
 
 <script src="./config.js"></script>
+<script src="./countries.js"></script>
 <script>
 const C = window.REC_CONFIG;
+let ccISO = "CO"; // país por defecto: Colombia
+function flagOf(iso){ return [...iso].map(ch=>String.fromCodePoint(127397+ch.charCodeAt(0))).join(""); }
+function renderCC(){
+  const cc=document.getElementById("cc"); const nameIdx = lang==="en"?1:2;
+  cc.innerHTML = (window.COUNTRIES||[]).map(c=>
+    `<option value="+${c[3]}" data-iso="${c[0]}" ${c[0]===ccISO?"selected":""}>${flagOf(c[0])} ${c[nameIdx]} (+${c[3]})</option>`
+  ).join("");
+}
 
 const I18N = {
   es:{
@@ -336,6 +352,7 @@ function render(){
   const eng=document.getElementById("english"); const cur=eng.value;
   eng.innerHTML = `<option value="" disabled ${cur?"":"selected"}>${t().english_ph}</option>` +
     t().english_opts.map(o=>`<option value="${o[0]}" ${cur===o[0]?"selected":""}>${o[1]}</option>`).join("");
+  renderCC();
   document.getElementById("cvLabel").textContent = cv.files[0] ? "📎 "+cv.files[0].name : t().f_cv_ph;
   document.querySelectorAll("#lang button").forEach(b=>b.classList.toggle("on", b.dataset.l===lang));
 }
@@ -346,6 +363,9 @@ cv.addEventListener("change",()=> document.getElementById("cvLabel").textContent
 
 document.getElementById("lang").addEventListener("click",e=>{
   const b=e.target.closest("button[data-l]"); if(!b) return; lang=b.dataset.l; render();
+});
+document.getElementById("cc").addEventListener("change",e=>{
+  const opt=e.target.selectedOptions[0]; if(opt) ccISO=opt.dataset.iso;
 });
 document.getElementById("kobox").addEventListener("click",e=>{
   const b=e.target.closest("button[data-v]"); if(!b) return;
@@ -366,7 +386,8 @@ const utm={}; for(const[k,v] of params) if(k.startsWith("utm_")) utm[k]=v;
 const form=document.getElementById("form"), msg=document.getElementById("msg"), btn=document.getElementById("submit");
 form.addEventListener("submit", async e=>{
   e.preventDefault(); msg.className="msg";
-  if(!form.nombre.value.trim()||!form.whatsapp.value.trim()) return showErr(t().err_req);
+  const num=document.getElementById("wanum").value.replace(/[^\d]/g,"");
+  if(!form.nombre.value.trim()||!num) return showErr(t().err_req);
   if(Object.keys(answers).length<2) return showErr(t().err_ko);
   const engVal=document.getElementById("english").value;
   if(!engVal) return showErr(t().err_english);
@@ -379,7 +400,7 @@ form.addEventListener("submit", async e=>{
     const fd=new FormData();
     fd.append("nombre",form.nombre.value.trim());
     fd.append("email",form.email.value.trim());
-    fd.append("whatsapp",form.whatsapp.value.trim());
+    fd.append("whatsapp",document.getElementById("cc").value+num);
     fd.append("whatsapp_optin","true");
     fd.append("fuente",fuente); fd.append("utm",JSON.stringify(utm));
     fd.append("knockout",JSON.stringify(ko));
