@@ -30,6 +30,7 @@ export type Candidate = {
   ubicacion: string | null;
   score_prueba: number | null;
   prueba_vence_at: string | null;
+  prueba_iniciada_at: string | null;
   enn_ranking: Record<string, number> | null;
   score_personalidad: number | null;
   score_total: number | null;

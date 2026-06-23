@@ -75,6 +75,32 @@
   const fileLabel = document.getElementById("fileLabel");
   archivo.addEventListener("change", ()=> fileLabel.textContent = archivo.files[0] ? "📎 "+archivo.files[0].name : "Haz clic para adjuntar tu entrega");
 
+  // Al abrir: arranca el contador de 72h (server-side) y muestra el countdown en vivo.
+  let venceMs = null;
+  (async ()=>{
+    const dl = document.getElementById("deadline");
+    if(!token){ dl.textContent="Enlace inválido"; return; }
+    try{
+      const res = await fetch(`${C.FUNCTIONS_URL}/submit-prueba?token=${encodeURIComponent(token)}`,
+        { headers:{ apikey:C.ANON_KEY, Authorization:`Bearer ${C.ANON_KEY}` }});
+      const data = await res.json();
+      if(!res.ok){ dl.textContent="Enlace inválido o expirado"; return; }
+      if(data.cerrada){ dl.textContent="Esta prueba ya fue entregada o cerrada"; return; }
+      venceMs = new Date(data.vence_at).getTime();
+      tick();
+      setInterval(tick, 1000);
+    }catch(e){ dl.textContent="No se pudo cargar el plazo"; }
+  })();
+
+  function tick(){
+    const dl = document.getElementById("deadline");
+    if(venceMs==null) return;
+    let s = Math.floor((venceMs - Date.now())/1000);
+    if(s<=0){ dl.textContent="⏰ El plazo terminó"; dl.style.color="var(--err)"; return; }
+    const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+    dl.textContent = `⏳ Tiempo restante: ${h}h ${String(m).padStart(2,"0")}m ${String(sec).padStart(2,"0")}s`;
+  }
+
   document.getElementById("submit").addEventListener("click", async ()=>{
     const msg = document.getElementById("msg"); msg.className="msg";
     const enlace = document.getElementById("enlace").value.trim();

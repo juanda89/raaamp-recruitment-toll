@@ -183,8 +183,9 @@ export async function sendPruebaTecnica(
   settings: Settings,
   notifyWhatsapp = true,
 ): Promise<Candidate> {
-  const venceAt = addHours(settings.plazo_prueba_horas);
-  const token = await makeToken(sb, candidate.id, "prueba", venceAt);
+  const venceAt = addHours(settings.plazo_prueba_horas); // tentativo; el real arranca al abrir
+  // El enlace vive 30 días; el contador de 72h empieza cuando el candidato lo ABRE.
+  const token = await makeToken(sb, candidate.id, "prueba", addHours(24 * 30));
   const c = await update(sb, candidate.id, {
     estado: "PRUEBA_TECNICA",
     flag_revision: false,
@@ -197,6 +198,30 @@ export async function sendPruebaTecnica(
   if (notifyWhatsapp) await notify(sb, c, settings, "C04", vars); // WhatsApp solo la menciona
   await scheduleReminders(sb, c, settings, "prueba", venceAt, ["C05", "C06"]);
   return c;
+}
+
+/**
+ * Arranca el contador de la prueba cuando el candidato ABRE el enlace por
+ * primera vez: fija prueba_iniciada_at, recalcula la fecha límite (ahora +
+ * plazo) y (re)programa los recordatorios. Si ya estaba iniciada, no hace nada.
+ * Devuelve la fecha límite vigente (ISO).
+ */
+export async function startPruebaTimer(
+  sb: SupabaseClient,
+  candidate: Candidate,
+  settings: Settings,
+): Promise<string> {
+  if (candidate.prueba_iniciada_at) {
+    return candidate.prueba_vence_at ?? addHours(settings.plazo_prueba_horas);
+  }
+  const venceAt = addHours(settings.plazo_prueba_horas);
+  await update(sb, candidate.id, {
+    prueba_iniciada_at: new Date().toISOString(),
+    prueba_vence_at: venceAt,
+  });
+  await cancelReminders(sb, candidate.id, "prueba");
+  await scheduleReminders(sb, candidate, settings, "prueba", venceAt, ["C05", "C06"]);
+  return venceAt;
 }
 
 /** Reenvía por correo la prueba técnica (correo equivocado / no llegó). */

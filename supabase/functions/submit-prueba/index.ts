@@ -6,11 +6,28 @@
 import { preflight, json } from "../_shared/cors.ts";
 import { serviceClient, getSettings } from "../_shared/supabase.ts";
 import { notify } from "../_shared/notify.ts";
+import { startPruebaTimer } from "../_shared/pipeline.ts";
 
 Deno.serve(async (req) => {
   const pf = preflight(req);
   if (pf) return pf;
   const origin = req.headers.get("origin");
+
+  // GET ?token=... -> al ABRIR la prueba arranca el contador de 72h y devuelve
+  // la fecha límite + el nombre, para mostrar el countdown en la página.
+  if (req.method === "GET") {
+    const token = new URL(req.url).searchParams.get("token") ?? "";
+    const sb = serviceClient();
+    const cand = await resolveToken(sb, token, "prueba");
+    if (!cand) return json({ error: "token inválido o expirado" }, 403, origin);
+    if (cand.estado !== "PRUEBA_TECNICA") {
+      return json({ ok: true, estado: cand.estado, cerrada: true, nombre: cand.nombre }, 200, origin);
+    }
+    const settings = await getSettings(sb);
+    const venceAt = await startPruebaTimer(sb, cand, settings); // primer open arranca el timer
+    return json({ ok: true, nombre: cand.nombre, vence_at: venceAt, estado: cand.estado }, 200, origin);
+  }
+
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405, origin);
 
   try {
@@ -23,6 +40,10 @@ Deno.serve(async (req) => {
     const cand = await resolveToken(sb, token, "prueba");
     if (!cand) return json({ error: "token inválido o expirado" }, 403, origin);
     if (cand.estado !== "PRUEBA_TECNICA") return json({ error: "etapa no válida" }, 409, origin);
+    // Plazo vencido (contado desde que abrió la prueba).
+    if (cand.prueba_vence_at && new Date(cand.prueba_vence_at).getTime() < Date.now()) {
+      return json({ error: "el plazo de la prueba ya venció" }, 409, origin);
+    }
 
     // Subir archivo de entrega (opcional) al bucket rec-submissions.
     let entregaUrl = enlace || null;
