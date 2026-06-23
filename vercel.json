@@ -1,8 +1,8 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [
-    { "source": "/aplicar", "destination": "/index.html" }
+  "redirects": [
+    { "source": "/aplicar", "destination": "/", "permanent": false }
   ],
   "headers": [
     {
