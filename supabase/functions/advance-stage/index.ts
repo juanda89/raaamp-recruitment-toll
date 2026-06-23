@@ -9,7 +9,7 @@ import { serviceClient, getSettings } from "../_shared/supabase.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { notify } from "../_shared/notify.ts";
 import {
-  onEntrevistaAgendada, decisionFinal, sendPruebaTecnica, rechazar,
+  onEntrevistaAgendada, decisionFinal, sendPruebaTecnica, rechazar, aprobarPrueba,
 } from "../_shared/pipeline.ts";
 
 Deno.serve(async (req) => {
@@ -45,8 +45,11 @@ Deno.serve(async (req) => {
       case "decision":
         result = await decisionFinal(sb, c, settings, args.decision);
         break;
-      case "aprobar_revision": // limpia la bandera y envía la prueba
+      case "aprobar_revision": // cualificación: limpia la bandera y envía la prueba
         result = await sendPruebaTecnica(sb, c, settings);
+        break;
+      case "aprobar_prueba": // el responsable aprueba la prueba -> pasa al test
+        result = await aprobarPrueba(sb, c, settings);
         break;
       case "rechazar":
         result = await rechazar(sb, c, settings, args.etapa ?? c.estado.toLowerCase(),

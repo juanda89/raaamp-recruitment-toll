@@ -194,7 +194,8 @@ function cardEl(x){
     <div class="meta">
       ${x.fuente?`<span class="tag">${esc(x.fuente)}</span>`:""}
       <span class="tag">${dias}d en etapa</span>
-      ${x.flag_revision?`<span class="tag flag">⚑ revisión</span>`:""}
+      ${(x.estado==="PRUEBA_TECNICA"&&x.prueba_entregada_at)?`<span class="tag flag">📥 prueba por evaluar</span>`
+        : x.flag_revision?`<span class="tag flag">⚑ revisión</span>`:""}
     </div>`;
   return d;
 }
@@ -273,7 +274,10 @@ function ennHtml(r){
 // ---------------- Actions ----------------
 function actionsHtml(x){
   const a=[];
-  if(x.flag_revision) a.push(btn("aprobar_revision","Aprobar y enviar prueba","primary"));
+  // Revisión de cualificación (filtro suave): aprobar y enviar la prueba.
+  if(x.flag_revision && x.estado==="CUALIFICACION_WA") a.push(btn("aprobar_revision","Aprobar y enviar prueba","primary"));
+  // Evaluación MANUAL de la prueba técnica: el responsable aprueba -> pasa al test.
+  if(x.estado==="PRUEBA_TECNICA" && x.prueba_entregada_at) a.push(btn("aprobar_prueba","Aprobar prueba → test","primary"));
   if(x.estado==="FINALISTA") a.push(btn("agendar_entrevista","Agendar entrevista","primary"));
   if(x.estado==="ENTREVISTA_FINAL"){ a.push(btn("decision_contratado","Contratar","primary")); a.push(btn("decision_rechazado","Rechazar","danger")); }
   if(x.estado==="CONTRATADO") a.push(btn("aceptar_oferta","Enviar bienvenida","primary"));

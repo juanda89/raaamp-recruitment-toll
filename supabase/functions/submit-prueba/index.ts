@@ -65,11 +65,14 @@ Deno.serve(async (req) => {
 
     await sb.from("rec_access_tokens").update({ usado_at: new Date().toISOString() })
       .eq("token", token);
+    // Ya entregó: cancela los recordatorios pendientes de la prueba.
+    await sb.from("rec_reminders").update({ cancelado: true })
+      .eq("candidate_id", cand.id).eq("motivo", "prueba").is("enviado_at", null);
 
     const settings = await getSettings(sb);
     await notify(sb, c, settings, "C07"); // confirmación de entrega
 
-    // Evaluación asíncrona.
+    // Evaluación ASISTIDA por IA (solo sugiere; el responsable decide).
     invokeAsync("evaluate-prueba", { candidate_id: cand.id });
     return json({ ok: true }, 201, origin);
   } catch (e) {

@@ -1,15 +1,13 @@
 // =====================================================================
-//  evaluate-prueba  (PRD 5.4 / 9.4) — Evaluación asistida por IA de la entrega
-//  de la prueba técnica. Produce score_prueba (0-100), lo guarda con su salida
-//  estructurada (auditoría) y avanza/rechaza según el umbral.
-//
-//  Nota: si la entrega es un enlace (repo), aquí se evalúa la URL/los metadatos.
-//  Para evaluar contenido descargado, ampliar para leer rec-submissions.
+//  evaluate-prueba  (PRD 5.4 / 9.4) — Evaluación ASISTIDA por IA de la entrega.
+//  La IA SUGIERE un puntaje (0-100) + notas y avisa al responsable; NO avanza el
+//  pipeline. El responsable revisa, ajusta y decide (aprobar/rechazar) desde el
+//  Kanban. Así la evaluación de la prueba técnica NO es automática.
 // =====================================================================
 import { json } from "../_shared/cors.ts";
 import { serviceClient, getSettings } from "../_shared/supabase.ts";
 import { evaluateAgainstRubric } from "../_shared/llm.ts";
-import { afterPruebaEntregada } from "../_shared/pipeline.ts";
+import { notify } from "../_shared/notify.ts";
 
 const RUBRICA_PRUEBA = `
 Evalúa la entrega de la prueba técnica del cargo "AI and Automation Specialist".
@@ -38,23 +36,31 @@ Deno.serve(async (req) => {
     const material =
       `Enlace/archivo de entrega: ${c.prueba_entrega_url}\n` +
       `Enunciado/rúbrica de referencia: ${settings.enunciado_prueba_url ?? "(no configurado)"}\n` +
-      `El revisor humano puede ajustar este puntaje en la ficha del candidato.`;
+      `Este puntaje es SOLO una SUGERENCIA; el revisor humano decide y puede ajustarlo.`;
 
     const result = await evaluateAgainstRubric(material, RUBRICA_PRUEBA,
       `Cargo: ${settings.cargo} en ${settings.empresa}.`);
 
+    // La IA solo SUGIERE: guarda el puntaje propuesto + notas y marca revisión.
+    // NO avanza el pipeline; eso lo decide el responsable desde el Kanban.
     const { data: updated } = await sb.from("rec_candidates").update({
       score_prueba: result.score,
       prueba_evaluacion: result.detalle,
+      flag_revision: true,
+      motivo_revision: "Prueba técnica entregada — pendiente de tu evaluación",
     }).eq("id", candidate_id).select("*").single();
 
     await sb.from("rec_candidate_events").insert({
       candidate_id, tipo: "scoring",
-      detalle: { componente: "prueba", score: result.score, simulado: result.simulado },
+      detalle: { componente: "prueba", score: result.score, simulado: result.simulado, sugerido: true },
     });
 
-    await afterPruebaEntregada(sb, updated, settings);
-    return json({ ok: true, score_prueba: result.score, simulado: result.simulado });
+    // Avisar al responsable que hay una prueba lista para revisar.
+    await notify(sb, updated, settings, "I01", {
+      motivo: `entregó la prueba técnica (sugerencia IA: ${result.score}/100). Revísala y decide.`,
+    });
+
+    return json({ ok: true, score_prueba_sugerido: result.score, simulado: result.simulado });
   } catch (e) {
     console.error(e);
     return json({ error: String(e) }, 500);

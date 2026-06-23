@@ -253,22 +253,22 @@ export async function resendPruebaEmail(
 // ---------------------------------------------------------------------
 //  Etapa 4 : resultado de la prueba técnica
 // ---------------------------------------------------------------------
-export async function afterPruebaEntregada(
+// La evaluación de la prueba NO es automática (PRD 5.4: asistida por IA). La IA
+// solo SUGIERE un puntaje; el responsable revisa y aprueba/rechaza desde el
+// Kanban. `aprobarPrueba` (abajo) hace avanzar al test cuando el humano aprueba.
+export async function aprobarPrueba(
   sb: SupabaseClient,
   candidate: Candidate,
   settings: Settings,
 ): Promise<Candidate> {
   await cancelReminders(sb, candidate.id, "prueba");
-  const score = candidate.score_prueba ?? 0;
-  if (score < settings.umbral_prueba) {
-    return rechazar(sb, candidate, settings, "prueba_tecnica",
-      `score_prueba ${score} < umbral ${settings.umbral_prueba}`, "C09");
-  }
   // Avanza al test de personalidad (C10) + token + recordatorios.
   const venceAt = addHours(settings.plazo_test_horas);
   const token = await makeToken(sb, candidate.id, "test", venceAt);
   const c = await update(sb, candidate.id, {
     estado: "TEST_PERSONALIDAD",
+    flag_revision: false,
+    motivo_revision: null,
     test_enviado_at: new Date().toISOString(),
     test_vence_at: venceAt,
   });
