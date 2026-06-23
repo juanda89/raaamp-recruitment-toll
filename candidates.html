@@ -105,10 +105,22 @@
     <div class="brand"><span class="dot"></span> raaamp · Pipeline</div>
     <div class="spacer"></div>
     <button class="btn" id="refreshBtn">↻ Actualizar</button>
+    <button class="btn" id="reportsBtn">📊 Reportes</button>
     <button class="btn" id="settingsBtn">⚙ Configuración</button>
     <button class="btn" id="logoutBtn">Salir</button>
   </header>
   <div class="board" id="board"></div>
+</div>
+
+<!-- REPORTES -->
+<div class="modal" id="reportsModal">
+  <div class="box">
+    <h2>📊 Reportes del embudo</h2>
+    <div id="reportsBody">Cargando…</div>
+    <div class="actions" style="margin-top:16px">
+      <button class="btn" id="closeReports">Cerrar</button>
+    </div>
+  </div>
 </div>
 
 <!-- DRAWER ficha -->
@@ -316,6 +328,43 @@ async function doAction(x, act){
     if(!res.ok) throw new Error(data.error||"Error");
     window.closeDrawer(); await loadAll();
   }catch(e){ m.className="msg err"; m.textContent=e.message; }
+}
+
+// ---------------- Reportes ----------------
+const STAGE_LABEL={APLICADO:"Nuevos",SCREENING_CV:"Screening CV",CUALIFICACION_WA:"Cualificación",PRUEBA_TECNICA:"Prueba técnica",TEST_PERSONALIDAD:"Test personalidad",FINALISTA:"Finalistas",ENTREVISTA_FINAL:"Entrevista",CONTRATADO:"Contratado"};
+qs("#reportsBtn").onclick = async ()=>{
+  qs("#reportsModal").style.display="flex"; qs("#reportsBody").innerHTML="Cargando…";
+  const { data, error } = await sb.rpc("rec_funnel");
+  if(error){ qs("#reportsBody").innerHTML="Error: "+error.message; return; }
+  renderReports(data);
+};
+qs("#closeReports").onclick = ()=> qs("#reportsModal").style.display="none";
+
+function renderReports(d){
+  const f=d.funnel||[]; const top=Math.max(1,...(f.map(s=>s.reached)));
+  const aplicado=(f[0]&&f[0].reached)||0;
+  const bars=f.map(s=>{
+    const w=Math.round(s.reached/top*100);
+    const conv=aplicado?Math.round(s.reached/aplicado*100):0;
+    return `<div style="margin-bottom:9px">
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px">
+        <span>${STAGE_LABEL[s.stage]||s.stage}</span><span style="color:var(--muted)">${s.reached} · ${conv}%</span></div>
+      <div style="height:14px;background:var(--panel);border-radius:7px;overflow:hidden">
+        <div style="height:100%;width:${w}%;background:var(--grad,linear-gradient(90deg,#98d653,#0ea5b9))"></div></div></div>`;
+  }).join("");
+  const kpi=(l,v)=>`<div class="score-box"><div class="v">${v}</div><div class="l">${l}</div></div>`;
+  const tasaContrat=aplicado?( (d.contratados/aplicado*100).toFixed(1)+"%"):"—";
+  const obj=(o)=>Object.keys(o||{}).length? Object.entries(o).map(([k,v])=>`<div class="kv"><span>${esc(k)}</span><span>${v}</span></div>`).join("") : '<div class="kv"><span>—</span><span></span></div>';
+  qs("#reportsBody").innerHTML=`
+    <div class="scores" style="margin-bottom:16px">
+      ${kpi("Total aplicados",d.total)}${kpi("Finalistas",((d.funnel.find(s=>s.stage==='FINALISTA')||{}).reached)||0)}
+      ${kpi("Contratados",d.contratados)}${kpi("Rechazados",d.rechazados)}
+    </div>
+    <div class="sec"><h4>Embudo (alcanzaron cada etapa · % vs aplicados)</h4>${bars}</div>
+    <div class="sec"><h4>Tasa de conversión a contratado</h4><div class="kv"><span>Aplicados → Contratados</span><span>${tasaContrat}</span></div>
+      <div class="kv"><span>Tiempo promedio hasta finalista</span><span>${d.horas_a_finalista!=null? d.horas_a_finalista+" h":"—"}</span></div></div>
+    <div class="sec"><h4>Por fuente</h4>${obj(d.por_fuente)}</div>
+    <div class="sec"><h4>Rechazos por etapa</h4>${obj(d.rechazo_por_etapa)}</div>`;
 }
 
 // ---------------- Settings ----------------
