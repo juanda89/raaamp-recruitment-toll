@@ -38,20 +38,20 @@
 <body>
 <div class="wrap">
   <div class="brand"><span class="dot"></span> raaamp</div>
-  <div id="loading" class="state">Cargando tu test…</div>
-  <div id="invalid" class="state" style="display:none">Este enlace no es válido o ya expiró.</div>
+  <div id="loading" class="state">Cargando tu test… · Loading…</div>
+  <div id="invalid" class="state" style="display:none"></div>
   <div id="done" class="state" style="display:none">
     <div style="font-size:46px">✅</div>
-    <h1>¡Test completado!</h1>
-    <p class="lead">Registramos tus respuestas. Te escribiremos por WhatsApp con el siguiente paso.</p>
+    <h1 id="doneH"></h1>
+    <p class="lead" id="doneP"></p>
   </div>
 
   <div id="app" style="display:none">
-    <h1>Test de afinidad</h1>
-    <p class="lead">No hay respuestas correctas: elige la opción con la que más te identificas. Toma 10–15 minutos.</p>
+    <h1 id="appH"></h1>
+    <p class="lead" id="appP"></p>
     <div class="progress"><div class="bar"><i id="fill"></i></div><div class="count" id="count"></div></div>
     <div id="questions"></div>
-    <button class="submit" id="submit" disabled>Enviar test</button>
+    <button class="submit" id="submit" disabled></button>
     <div class="msg" id="msg"></div>
   </div>
 </div>
@@ -62,6 +62,27 @@
   const token = new URLSearchParams(location.search).get("token");
   const choices = {}; // question_id -> "A"|"B"
   let total = 0;
+  let lang = "es";
+
+  const I18N = {
+    es:{ invalid:"Este enlace no es válido o ya expiró.",
+      doneH:"¡Test completado!", doneP:"Registramos tus respuestas. Te escribiremos por WhatsApp con el siguiente paso.",
+      appH:"Test de afinidad", appP:"No hay respuestas correctas: elige la opción con la que más te identificas. Toma 10–15 minutos.",
+      q:(i,t)=>`Pregunta ${i} de ${t}`, count:(n,t)=>`${n} / ${t} respondidas`, send:"Enviar test", sending:"Enviando…" },
+    en:{ invalid:"This link is invalid or has expired.",
+      doneH:"Test completed!", doneP:"We've recorded your answers. We'll message you on WhatsApp with the next step.",
+      appH:"Affinity test", appP:"There are no right answers — pick the option you identify with most. Takes 10–15 minutes.",
+      q:(i,t)=>`Question ${i} of ${t}`, count:(n,t)=>`${n} / ${t} answered`, send:"Submit test", sending:"Sending…" }
+  };
+  const T = ()=> I18N[lang];
+  function applyT(){
+    document.getElementById("doneH").textContent = T().doneH;
+    document.getElementById("doneP").textContent = T().doneP;
+    document.getElementById("appH").textContent = T().appH;
+    document.getElementById("appP").textContent = T().appP;
+    document.getElementById("submit").textContent = T().send;
+    document.documentElement.lang = lang;
+  }
 
   async function load(){
     if(!token){ return invalid(); }
@@ -70,6 +91,8 @@
         { headers:{ apikey:C.ANON_KEY, Authorization:`Bearer ${C.ANON_KEY}` }});
       const data = await res.json();
       if(!res.ok || !data.preguntas?.length) return invalid();
+      lang = data.idioma === "en" ? "en" : "es";
+      applyT();
       render(data.preguntas);
     }catch(e){ invalid(); }
   }
@@ -80,7 +103,7 @@
     preguntas.forEach((p,i)=>{
       const div = document.createElement("div");
       div.className="q";
-      div.innerHTML = `<div class="n">Pregunta ${i+1} de ${total}</div>
+      div.innerHTML = `<div class="n">${T().q(i+1,total)}</div>
         <div class="opt" data-q="${p.id}" data-v="A"><span class="rb"></span><span>${esc(p.opcion_a)}</span></div>
         <div class="opt" data-q="${p.id}" data-v="B"><span class="rb"></span><span>${esc(p.opcion_b)}</span></div>`;
       cont.appendChild(div);
@@ -99,13 +122,13 @@
   function refresh(){
     const n = Object.keys(choices).length;
     document.getElementById("fill").style.width = (n/total*100)+"%";
-    document.getElementById("count").textContent = `${n} / ${total} respondidas`;
+    document.getElementById("count").textContent = T().count(n,total);
     document.getElementById("submit").disabled = n < total;
   }
 
   document.getElementById("submit").addEventListener("click", async ()=>{
     const btn = document.getElementById("submit");
-    btn.disabled=true; btn.textContent="Enviando…";
+    btn.disabled=true; btn.textContent=T().sending;
     const respuestas = Object.entries(choices).map(([question_id,eleccion])=>({question_id:Number(question_id),eleccion}));
     try{
       const res = await fetch(`${C.FUNCTIONS_URL}/submit-test`,{
@@ -119,12 +142,12 @@
       document.getElementById("done").style.display="block";
     }catch(e){
       const m=document.getElementById("msg"); m.className="msg err"; m.textContent=e.message;
-      btn.disabled=false; btn.textContent="Enviar test";
+      btn.disabled=false; btn.textContent=T().send;
     }
   });
 
   function invalid(){ document.getElementById("loading").style.display="none";
-    document.getElementById("invalid").style.display="block"; }
+    const el=document.getElementById("invalid"); el.textContent=T().invalid; el.style.display="block"; }
   function esc(s){ const d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
   load();
 </script>

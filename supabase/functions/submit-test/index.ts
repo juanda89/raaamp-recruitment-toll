@@ -21,9 +21,17 @@ Deno.serve(async (req) => {
     const sb = serviceClient();
     const cand = await resolveToken(sb, token, "test");
     if (!cand) return json({ error: "token inválido o expirado" }, 403, origin);
+    const lang = cand.idioma === "en" ? "en" : "es";
     const { data } = await sb.from("rec_personality_questions")
-      .select("id, orden, opcion_a, opcion_b").eq("activo", true).order("orden");
-    return json({ ok: true, nombre: cand.nombre, preguntas: data ?? [] }, 200, origin);
+      .select("id, orden, opcion_a, opcion_b, opcion_a_en, opcion_b_en").eq("activo", true).order("orden");
+    // Sirve cada opción en el idioma del candidato (cae a español si falta EN).
+    const preguntas = (data ?? []).map((q: any) => ({
+      id: q.id,
+      orden: q.orden,
+      opcion_a: lang === "en" && q.opcion_a_en ? q.opcion_a_en : q.opcion_a,
+      opcion_b: lang === "en" && q.opcion_b_en ? q.opcion_b_en : q.opcion_b,
+    }));
+    return json({ ok: true, nombre: cand.nombre, idioma: lang, preguntas }, 200, origin);
   }
 
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405, origin);
