@@ -12,12 +12,17 @@ import { evaluateAgainstRubric } from "../_shared/llm.ts";
 import { afterPruebaEntregada } from "../_shared/pipeline.ts";
 
 const RUBRICA_PRUEBA = `
-Evalúa la entrega de la prueba técnica del cargo "AI and Automation Specialist":
-- Cumple el objetivo del reto y los requisitos del enunciado.        [peso alto]
-- Calidad de la automatización/flujo y manejo de errores.            [peso alto]
-- Buenas prácticas, legibilidad y estructura del código.             [peso medio]
-- Documentación y claridad de la entrega.                            [peso medio]
-- Creatividad y robustez de la solución.                             [peso bajo]`;
+Evalúa la entrega de la prueba técnica del cargo "AI and Automation Specialist".
+El reto es sobre Google Sheets + Apps Script:
+- Menú "Admin" con control de acceso por código que funciona correctamente.   [peso alto]
+- Herramienta "Monthly Comparative Report": actual vs. planeado por categoría,
+  detección de desviaciones (~15-20%+), resalta los ítems responsables y genera
+  el reporte en una pestaña o borrador de Gmail.                               [peso alto]
+- Buenas prácticas: código limpio, modular y mantenible; manejo de errores.    [peso medio]
+- Claridad del RESUMEN en lenguaje no técnico (para un fundador): explica la
+  lógica, las decisiones y cómo la automatización resuelve el problema.        [peso medio-alto]
+- Bonus: script de despliegue masivo a copias de clientes (escalabilidad).     [peso bajo]
+Penaliza entregas incompletas, que no corran, o sin el resumen explicativo.`;
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
