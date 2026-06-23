@@ -35,3 +35,6 @@ verify_jwt = false        # valida el JWT del responsable manualmente
 
 [functions.reminders-cron]
 verify_jwt = true         # invocada por pg_cron con service_role
+
+[functions.sync-interviews]
+verify_jwt = true         # invocada por pg_cron; lee Google Calendar
